@@ -13,5 +13,20 @@
     "id": "safe",
     "title": "$care.safe.title",
     "action": "$care.safe.action"
+  },
+  {
+    "id": "meal",
+    "title": "$journey.meal.title",
+    "action": "$journey.meal.action"
+  },
+  {
+    "id": "day",
+    "title": "$journey.day.title",
+    "action": "$journey.day.action"
+  },
+  {
+    "id": "home",
+    "title": "$journey.home.title",
+    "action": "$journey.home.action"
   }
 ]

@@ -6,6 +6,7 @@ import {
   admin,
   spectate,
   demo,
+  demonstration,
 } from "../systems/runtime.js";
 import { presence } from "../systems/presence.js";
 import { openShare, exportEditorial, recordTimelapse } from "./share.js";
@@ -63,7 +64,7 @@ export function mountDaily({
     const c = currentClock(),
       s = store.summary(c),
       p = presence(c, demo.neighbors);
-    document.getElementById("dailyTotal").textContent = s.total;
+    document.getElementById("dailyTotal").textContent = store.journey(c).stones;
     document.getElementById("dailyStreak").textContent =
       copy("text.029") + s.streak + copy("text.030");
     document.getElementById("dailyClock").textContent =
@@ -80,7 +81,7 @@ export function mountDaily({
       const done = s.flags.includes(item.id);
       b.textContent = (done ? "✓ " : "○ ") + item.label;
       b.setAttribute("aria-pressed", String(done));
-      b.disabled = spectate || done || c.hour < item.hour;
+      b.disabled = spectate || demonstration || done || c.hour < item.hour;
       b.title = c.hour < item.hour ? item.hour + copy("text.032") : "";
     });
     const reward = data.rewards.filter((x) => s.total >= x.days).at(-1);

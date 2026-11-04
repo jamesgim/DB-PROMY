@@ -374,6 +374,202 @@
 .care-complete .care-loop > p:first-of-type {
   display: none;
 }
+.journey-loop .care-choices {
+  grid-template-columns: 1fr 1fr;
+}
+.journey-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 6px;
+}
+.journey-actions button {
+  font-size: 12px !important;
+  text-align: center;
+}
+.journey-mode {
+  color: #ffe4a0 !important;
+  border-left: 3px solid #ffe4a0;
+  padding-left: 8px;
+}
+.tower-progress {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 12px 0;
+}
+.tower-tile {
+  border: 1px solid #d8e5cb44;
+  padding: 8px;
+  border-radius: 9px;
+  text-align: center;
+}
+.tower-tile b,
+.tower-tile strong {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.tower-tile strong {
+  font-size: 20px;
+  color: #e4f5ad;
+}
+.tower-tile progress {
+  width: 100%;
+  height: 5px;
+  accent-color: #ffda91;
+}
+.tower-tile small {
+  font-size: 10px;
+  color: #ffda91;
+}
+.tower-tile.complete {
+  border-color: #ffda91;
+  background: #ffda9115;
+}
+.journey-nav {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+.journey-nav button {
+  font-size: 11px;
+  padding: 8px 4px;
+  text-align: center;
+}
+.reward-ready {
+  background: #ffda91 !important;
+  color: #173c2d !important;
+}
+.demo-switch {
+  font-size: 11px;
+  color: #e4f5ad;
+  display: block;
+  margin: 12px 0;
+  text-align: center;
+}
+.demo-journey {
+  border-color: #ffda91 !important;
+}
+.promise-progress {
+  font-size: 12px;
+  margin: 12px 0;
+  line-height: 1.8;
+}
+.promise-progress summary {
+  cursor: pointer;
+}
+.world-tower-labels {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 7;
+}
+.world-tower-labels span {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  background: #103e30dc;
+  color: #fff1bb;
+  border: 1px solid #d3e1b855;
+  border-radius: 20px;
+  padding: 7px 12px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.journey-dialog {
+  width: min(720px, 95vw);
+}
+.constellation-canvas {
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+}
+.goods-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.goods-grid figure {
+  margin: 0;
+  background: #fff3e5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.goods-grid img {
+  width: 100%;
+  height: 140px;
+  object-fit: contain;
+  max-height: none;
+}
+.goods-grid figcaption {
+  padding: 7px;
+  font-size: 11px;
+  text-align: center;
+}
+.journey-dialog select {
+  font: inherit;
+  max-width: 100%;
+  padding: 10px;
+  border: 1px solid #9db29a;
+  border-radius: 8px;
+}
+.journey-dialog .reward-product {
+  height: 320px;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+  background: #fff3e5;
+}
+#rewardResult {
+  margin: 15px 0;
+  text-align: center;
+}
+.gacha-opening {
+  min-height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffda91, transparent 70%);
+  animation: giftPulse 0.45s infinite alternate;
+}
+@keyframes giftPulse {
+  to {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+}
+.goods-notice {
+  color: #647e65;
+  font-size: 11px !important;
+}
+.journey-dialog button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+@media (max-width: 900px) {
+  .journey-loop .care-choices {
+    grid-template-columns: 1fr 1fr;
+  }
+  .journey-nav {
+    grid-template-columns: 1fr;
+  }
+  .tower-tile {
+    padding: 5px;
+  }
+  .tower-tile strong {
+    font-size: 15px;
+  }
+  .tower-tile b {
+    font-size: 10px;
+  }
+  .goods-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .world-tower-labels span {
+    font-size: 10px;
+    padding: 5px;
+  }
+  .journey-actions {
+    grid-template-columns: 1fr;
+  }
+}
 .care-primary {
   background: #dff4a9 !important;
   color: #17392d !important;

@@ -8,6 +8,7 @@ import {
   demo,
 } from "../systems/runtime.js";
 import { hydrateCopy } from "../data/copy.js";
+import { paintTowers, paintStars } from "./journey-art.js";
 hydrateCopy();
 if ("serviceWorker" in navigator)
   navigator.serviceWorker.register("./sw.js").catch(() => {});
@@ -116,6 +117,9 @@ function draw() {
   ctx.fillStyle = "#f5f0df";
   ctx.fillText("PC", 225, 370);
   ctx.fillText(copy("text.056"), 102, 370);
+  const journey = store.journey(c);
+  paintStars(ctx, 540, 160, journey.stars, store.state.variant);
+  paintTowers(ctx, 12, 65, 480, 180, journey.slots);
   document.getElementById("fallbackStats").textContent =
     copy("text.057") +
     store.state.pending.length +

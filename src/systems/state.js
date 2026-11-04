@@ -1,9 +1,15 @@
 import { copy } from "../data/copy.js";
 import { kst, dayNumber, weekKey } from "./clock.js";
-export const KEY = "promy.world.v2";
+import {
+  MISSION_IDS,
+  freshJourney,
+  cleanJourney,
+  journeyProgress,
+} from "./journey.js";
+export const KEY = "promy.world.v3";
 const LEGACY_KEY = "promy.world.v1";
 const IDS = ["meal", "day", "home", "care"];
-const CARE_IDS = ["water", "pause", "safe"];
+const CARE_IDS = MISSION_IDS;
 const SOURCES = ["reels", "story", "blog", "qr-camp", "qr-concert", "kakao"];
 const NAMES = [
   copy("text.002"),
@@ -21,7 +27,8 @@ const validDay = (d) =>
 const count = (n) => (Number.isInteger(n) && n >= 0 && n <= 100000 ? n : 0);
 export function fresh(variant = Math.floor(Math.random() * 6)) {
   return {
-    version: 2,
+    version: 3,
+    journey: freshJourney(),
     variant,
     house: variant,
     name: NAMES[variant],
@@ -37,9 +44,10 @@ export function fresh(variant = Math.floor(Math.random() * 6)) {
 }
 // Explicit allowlist: unknown fields, names, promise text and arbitrary URL values never persist.
 export function migrate(raw) {
-  if (!raw || ![1, 2].includes(raw.version)) return fresh();
+  if (!raw || ![1, 2, 3].includes(raw.version)) return fresh();
   const next = fresh(count(raw.variant) % 6);
   next.house = count(raw.house) % 6;
+  next.journey = cleanJourney(raw.journey);
   for (const [day, letter] of Object.entries(raw.letters ?? {})) {
     if (validDay(day) && letter && CARE_IDS.includes(letter.id))
       next.letters[day] = { id: letter.id, done: letter.done === true };
@@ -111,13 +119,18 @@ export function createStore({
   storage,
   now = () => Date.now(),
   spectate = false,
+  demonstration = false,
+  random = () => Math.random(),
 } = {}) {
   let state,
     available = true;
   try {
     state = migrate(
       JSON.parse(
-        storage?.getItem(KEY) ?? storage?.getItem(LEGACY_KEY) ?? "null",
+        storage?.getItem(KEY) ??
+          storage?.getItem("promy.world.v2") ??
+          storage?.getItem(LEGACY_KEY) ??
+          "null",
       ),
     );
   } catch {
@@ -137,6 +150,53 @@ export function createStore({
   function act(type, payload, clock = kst(now())) {
     if (spectate) return false;
     const day = clock.day;
+    if (
+      [
+        "placeStone",
+        "demoStone",
+        "demoChoose",
+        "demoConfirm",
+        "drawReward",
+        "resetDemo",
+      ].includes(type)
+    ) {
+      const p = journeyProgress(state, day, demonstration);
+      if (type === "resetDemo") {
+        if (!demonstration) return false;
+        state.journey.demo = freshJourney().demo;
+      } else if (type === "placeStone") {
+        if (demonstration || !p.canPlace) return false;
+        state.journey.placedDays.push(day);
+      } else if (type === "demoStone") {
+        if (!demonstration || !p.canPlace) return false;
+        state.journey.demo.stones++;
+        const id = state.journey.demo.selection;
+        state.journey.demo.counts[id] =
+          (state.journey.demo.counts[id] ?? 0) + 1;
+      } else if (type === "demoChoose") {
+        if (!demonstration || !MISSION_IDS.includes(payload)) return false;
+        state.journey.demo.selection = payload;
+        state.journey.demo.confirmed = false;
+      } else if (type === "demoConfirm") {
+        if (!demonstration) return false;
+        state.journey.demo.confirmed = true;
+      } else {
+        if (!p.available.includes(payload)) return false;
+        const value = Math.max(0, Math.min(0.999999, Number(random()) || 0)),
+          goodsId = 1 + Math.floor(value * 20);
+        (demonstration ? state.journey.demo.draws : state.journey.draws)[
+          payload
+        ] = { goodsId, status: "awaiting-fulfillment" };
+      }
+      save();
+      emit();
+      return true;
+    }
+    if (
+      demonstration &&
+      ["chooseCare", "completeCare", "checkin"].includes(type)
+    )
+      return false;
     if (type === "chooseCare") {
       if (!CARE_IDS.includes(payload) || state.letters[day]?.done) return false;
       state.letters[day] = { id: payload, done: false };
@@ -224,6 +284,9 @@ export function createStore({
       return available;
     },
     spectate,
+    demonstration,
+    journey: (clock = kst(now())) =>
+      journeyProgress(state, clock.day, demonstration),
     act,
     summary: (clock = kst(now())) => summary(state, clock.day),
     subscribe(fn) {

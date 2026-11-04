@@ -9,6 +9,7 @@ import { mountCampaign } from "../ui/campaign.js";
 import { toast } from "../ui/daily.js";
 import { setCapture, setVideoSource } from "../ui/share.js";
 import { postprocessing } from "./post.js";
+import { createJourneyWorld } from "./journey.js";
 export async function startWorld() {
   const $ = (id) => document.getElementById(id),
     params = new URLSearchParams(location.search);
@@ -148,6 +149,7 @@ export async function startWorld() {
   });
   zones = buildZones(scene, assets, actions, low);
   const sky = createSky(scene, low);
+  const journeyWorld = createJourneyWorld(scene);
   input = controls(renderer, player.root, camera, {
     targets: zones.targets,
     modalOpen: () =>
@@ -211,13 +213,34 @@ export async function startWorld() {
     }
   });
   window.addEventListener("promy:care", () => {
-    window.dispatchEvent(new Event("promy:home"));
     player.play("check_in", true);
+  });
+  window.addEventListener("promy:towers", () => {
+    input.view = "towers";
+  });
+  window.addEventListener("promy:stars", () => {
+    input.view = "stars";
+  });
+  window.addEventListener("promy:stone", (e) => {
+    player.play("cheer", true);
+    cheerUntil = performance.now() + 1200;
+    effects.position.copy(player.root.position);
+    input.view = "towers";
+    if (e.detail.stones % 100 === 0) {
+      neighbors.forEach((n) => n.play("cheer", true));
+      cinematic(
+        copy(e.detail.yearComplete ? "journey.annual" : "journey.hundred"),
+        copy("journey.goal")
+          .replace("{n}", e.detail.stones)
+          .replace("{t}", e.detail.towers)
+          .replace("{s}", e.detail.stars),
+      );
+    }
   });
   $("soundBtn").onclick = () => toast(copy("text.109"));
   $("reset").onclick = () => {
     if (!spectate && confirm(copy("text.110"))) {
-      store.act("reset");
+      store.act(store.demonstration ? "resetDemo" : "reset");
       location.reload();
     }
   };
@@ -236,6 +259,7 @@ export async function startWorld() {
     const c = currentClock(),
       s = zones.update(c, demo.milestone);
     input.update(dt);
+    const journey = journeyWorld.update(camera, now, input.view);
     if (cheerUntil < now) player.play(input.moving ? "walk" : "idle");
     player.mixer.update(dt);
     neighbors.forEach((n, i) => {
@@ -305,6 +329,13 @@ export async function startWorld() {
           .setFromObject(player.root)
           .getSize(new T.Vector3()).y,
         hasCampfire: !!scene.getObjectByName("Campfire"),
+        journey: {
+          stones: journey.stones,
+          slots: journey.slots,
+          stars: journey.stars,
+          available: journey.available.length,
+          mode: journey.mode,
+        },
       };
   }
   setCapture(() => {

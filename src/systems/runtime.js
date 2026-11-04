@@ -14,7 +14,8 @@ try {
 }
 export const admin = params.get("admin") === "1";
 export const spectate = params.get("spectate") === "1";
-export const store = createStore({ storage, spectate });
+export const demonstration = admin || params.get("demo") === "1";
+export const store = createStore({ storage, spectate, demonstration });
 export const demo = { hour: null, neighbors: null, milestone: 0, ritual: 0 };
 export function currentClock() {
   const c = kst();
@@ -51,11 +52,12 @@ store.act("visit", params.get("src"));
 store.act("name", params.get("name"));
 console.info("PROMY local referral metrics", store.state.metrics.visits);
 export const data = await Promise.all(
-  ["checkin", "brand", "categories", "rewards", "care"].map(loadData),
-).then(([checkin, brand, categories, rewards, care]) => ({
+  ["checkin", "brand", "categories", "rewards", "care", "goods"].map(loadData),
+).then(([checkin, brand, categories, rewards, care, goods]) => ({
   checkin,
   brand,
   categories,
   rewards,
   care,
+  goods,
 }));

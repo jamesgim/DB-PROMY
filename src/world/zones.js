@@ -83,18 +83,6 @@ export function buildZones(scene, assets, actions, low) {
     label.position.set(x, 5, z - 5);
     scene.add(label);
   });
-  const stamps = new T.InstancedMesh(
-    new T.BoxGeometry(0.65, 0.08, 0.9),
-    new T.MeshStandardMaterial({ color: 0xffffff }),
-    7,
-  );
-  for (let i = 0; i < 7; i++) {
-    dummy.position.set(-2.4 + i * 0.8, 0.45, 7);
-    dummy.rotation.set(0, 0, 0);
-    dummy.updateMatrix();
-    stamps.setMatrixAt(i, dummy.matrix);
-  }
-  scene.add(stamps);
   const dogs = [0, 1].map((i) => {
     const d = assets.actor("dog");
     d.root.position.set(-21 + i * 5, 0, -12);
@@ -253,17 +241,17 @@ export function buildZones(scene, assets, actions, low) {
       name: copy("care.station"),
       at: new T.Vector3(0, 0, 7),
       radius: 3,
-      click: () => document.querySelector("[data-care]")?.focus(),
+      click: () => {
+        const button = document.querySelector("#placeStone:not(:disabled)");
+        if (button) button.click();
+        else document.querySelector("[data-care]")?.focus();
+      },
     },
   );
   let pending = -1;
   function update(clock, milestone = 0) {
     const s = store.summary(clock);
     const level = Math.max(s.total, milestone);
-    const collected = s.total % 7 || (s.total ? 7 : 0);
-    for (let i = 0; i < 7; i++)
-      stamps.setColorAt(i, new T.Color(i < collected ? 0xffda91 : 0xc1c9b8));
-    stamps.instanceColor.needsUpdate = true;
     if (pending !== store.state.pending.length) {
       pending = store.state.pending.length;
       syncLanterns();

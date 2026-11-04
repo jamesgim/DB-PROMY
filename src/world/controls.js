@@ -113,6 +113,17 @@ export function controls(
         input.joy.y;
     const l = Math.hypot(x, z);
     input.moving = l > 0.1 && !spectate && !modalOpen();
+    if (input.moving) input.view = null;
+    if (input.view === "towers" || input.view === "stars") {
+      const stars = input.view === "stars",
+        dest = stars ? new T.Vector3(0, 12, 21) : new T.Vector3(12, 10, 23),
+        target = stars ? new T.Vector3(0, 17, -13) : new T.Vector3(0, 2.5, 6);
+      camera.position.lerp(dest, 1 - Math.exp(-4 * dt));
+      camera.lookAt(target);
+      document.getElementById("nearPrompt").classList.remove("show");
+      input.near = null;
+      return;
+    }
     if (input.moving) {
       x /= l;
       z /= l;

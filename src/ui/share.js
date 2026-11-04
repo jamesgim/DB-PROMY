@@ -1,3 +1,4 @@
+import { paintStars, paintTowers } from "./journey-art.js";
 import { copy } from "../data/copy.js";
 import { store, currentClock, data } from "../systems/runtime.js";
 import { DAY, weekKey } from "../systems/clock.js";
@@ -70,36 +71,35 @@ function publicURL() {
 async function makeCard(w, h, avatar) {
   const c = canvas(w, h),
     ctx = c.getContext("2d"),
-    s = store.summary(currentClock());
+    s = store.summary(currentClock()),
+    progress = store.journey(currentClock());
   base(ctx, w, h);
-  sky(ctx, w, h, s.stars);
+  paintStars(ctx, w, h * 0.65, progress.stars, store.state.variant);
   text(ctx, copy("text.061"), w / 2, 95, 40);
-  text(ctx, currentClock().day, w / 2, 150, 25, "#b9d8bf");
+  text(
+    ctx,
+    currentClock().day +
+      (progress.mode === "demo" ? " · " + copy("journey.demoResult") : ""),
+    w / 2,
+    150,
+    25,
+    "#b9d8bf",
+  );
   if (avatar) {
-    const size = h > 1200 ? 720 : 400;
+    const size = h > 1200 ? 660 : 330;
     ctx.drawImage(avatar, (w - size) / 2, h * 0.18, size, size);
   } else {
     text(ctx, "✦", w / 2, h * 0.42, 160, "#ffd99a");
   }
-  const y = h * 0.7;
-  const days = Object.keys(store.state.days)
-      .filter((d) => d <= currentClock().day)
-      .sort()
-      .slice(-7),
-    stampY = h > 1200 ? h * 0.6 : h * 0.57;
-  for (let i = 0; i < 7; i++) {
-    const x = 155 + i * 110;
-    ctx.fillStyle = days[i] ? "#ffda91" : "#36594c";
-    ctx.fillRect(x, stampY, 94, 68);
-    text(
-      ctx,
-      days[i] ? days[i].slice(5).replace("-", ".") : "·",
-      x + 47,
-      stampY + 43,
-      23,
-      days[i] ? "#173c2c" : "#a3b9a7",
-    );
-  }
+  const y = h > 1200 ? h * 0.78 : 780;
+  paintTowers(
+    ctx,
+    140,
+    h > 1200 ? h * 0.58 : 560,
+    w - 280,
+    h > 1200 ? 230 : 130,
+    progress.slots,
+  );
   const chosen = data.care.find((x) => x.id === s.letter?.id);
   text(
     ctx,
@@ -112,18 +112,19 @@ async function makeCard(w, h, avatar) {
   );
   text(
     ctx,
-    copy("text.062") +
-      store.state.pending.length +
-      copy("text.063") +
-      s.streak +
-      copy("text.030"),
+    copy("journey.badge")
+      .replaceAll("{n}", progress.stones)
+      .replace("{t}", progress.towers),
     w / 2,
     y,
     33,
   );
   text(
     ctx,
-    copy("text.064") + s.total + copy("text.065"),
+    copy("journey.goal")
+      .replace("{n}", progress.stones)
+      .replace("{t}", progress.towers)
+      .replace("{s}", progress.stars),
     w / 2,
     y + 65,
     44,

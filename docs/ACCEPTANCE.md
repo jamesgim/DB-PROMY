@@ -1,5 +1,19 @@
 # Issue #1 acceptance record
 
+## Tower / star / goods core, 2026-11-05
+
+The latest user instruction replaces the stamp-only core. Confirm an ordinary life promise, explicitly place one stone per KST day, reveal one personal star, complete each 100-stone tower and unlock a goods draw. The second tower begins at 101, the third at 201, and the yearly goal completes at 300. A life-promise category also grants one ticket at its first 100 distinct recorded dates; the selected meal promise and an evening meal check on the same date count only once.
+
+`?demo=1` or admin mode enables actual keyboard `1` repetitions and a mobile add button. Demo stones, category counts and prize records persist separately from real dates, stones and prizes. Demo is capped at 300. Resetting demo never clears real records. Spectators cannot add stones or draw. Old v1/v2 records migrate into v3 without invented retroactive stones.
+
+Three InstancedMesh cairns animate the latest stone falling into place. Personal Points/LineSegments reveal one star per stone; the separate constellation viewer and PNG cards use the same deterministic positions. Cards include three actual tower counts, stars, and explicit simulation labels when needed.
+
+The user explicitly requested the supplied HTML's goods to appear on screen. Only the 20 authorized product-design tiles were extracted into `assets/goods/`; the private HTML and other source references remain excluded. Each eligible source ticket can draw once, with a locally randomized goods ID and saved result. The user confirmed no fulfillment system exists and selected implementation before shipping integration. All results therefore say fulfillment pending, demo results never claim real entitlement, the shipping button is disabled, and no address/contact data are collected. Real fulfillment needs server-verified eligibility, an operations inventory and a separate consented claim flow.
+
+Validation: 19 state/asset tests pass, including real 100/101/300 boundaries, once-per-day placement, category-date deduplication, reward replay rejection, migration, demo cap/reset/isolation and spectator protection. `npm run qa` performs 300 real keyboard events in a browser, renders all three towers, opens the 20-product gallery, draws a real local image/result, checks persistence, inspects 300 stars, generates a PNG and exercises mobile and Canvas fallback. Browser errors: zero. Latest software-GPU low-tier capture at 300 stones: 42 calls, 37,530 triangles, eight point lights; physical-device FPS remains unverified.
+
+These entries supersede earlier stamp-only / evening-core acceptance descriptions below. No server-wide presence, real shipment, production eligibility security or retention effectiveness is claimed.
+
 ## Revision following user feedback, 2026-11-05
 
 The daily core now works at any KST hour: choose an ordinary care action, perform it outside the app, confirm it, earn one daily stamp, and revisit a dated album / seven-stamp postcard. Completion is self-reported, not monitored or verified. Evening checks remain optional. v2 storage migrates v1 dates/promises/stars and keeps the old key intact so an already-open old tab cannot erase new care records.

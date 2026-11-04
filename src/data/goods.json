@@ -1,0 +1,102 @@
+[
+  {
+    "id": 1,
+    "name": "$goods.1",
+    "image": "./assets/goods/promy-01.webp"
+  },
+  {
+    "id": 2,
+    "name": "$goods.2",
+    "image": "./assets/goods/promy-02.webp"
+  },
+  {
+    "id": 3,
+    "name": "$goods.3",
+    "image": "./assets/goods/promy-03.webp"
+  },
+  {
+    "id": 4,
+    "name": "$goods.4",
+    "image": "./assets/goods/promy-04.webp"
+  },
+  {
+    "id": 5,
+    "name": "$goods.5",
+    "image": "./assets/goods/promy-05.webp"
+  },
+  {
+    "id": 6,
+    "name": "$goods.6",
+    "image": "./assets/goods/promy-06.webp"
+  },
+  {
+    "id": 7,
+    "name": "$goods.7",
+    "image": "./assets/goods/promy-07.webp"
+  },
+  {
+    "id": 8,
+    "name": "$goods.8",
+    "image": "./assets/goods/promy-08.webp"
+  },
+  {
+    "id": 9,
+    "name": "$goods.9",
+    "image": "./assets/goods/promy-09.webp"
+  },
+  {
+    "id": 10,
+    "name": "$goods.10",
+    "image": "./assets/goods/promy-10.webp"
+  },
+  {
+    "id": 11,
+    "name": "$goods.11",
+    "image": "./assets/goods/promy-11.webp"
+  },
+  {
+    "id": 12,
+    "name": "$goods.12",
+    "image": "./assets/goods/promy-12.webp"
+  },
+  {
+    "id": 13,
+    "name": "$goods.13",
+    "image": "./assets/goods/promy-13.webp"
+  },
+  {
+    "id": 14,
+    "name": "$goods.14",
+    "image": "./assets/goods/promy-14.webp"
+  },
+  {
+    "id": 15,
+    "name": "$goods.15",
+    "image": "./assets/goods/promy-15.webp"
+  },
+  {
+    "id": 16,
+    "name": "$goods.16",
+    "image": "./assets/goods/promy-16.webp"
+  },
+  {
+    "id": 17,
+    "name": "$goods.17",
+    "image": "./assets/goods/promy-17.webp"
+  },
+  {
+    "id": 18,
+    "name": "$goods.18",
+    "image": "./assets/goods/promy-18.webp"
+  },
+  {
+    "id": 19,
+    "name": "$goods.19",
+    "image": "./assets/goods/promy-19.webp"
+  },
+  {
+    "id": 20,
+    "name": "$goods.20",
+    "image": "./assets/goods/promy-20.webp"
+  }
+]

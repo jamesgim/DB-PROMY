@@ -8,7 +8,7 @@
     "assets": "node scripts/build-assets.js",
     "offline": "node scripts/build-offline.js",
     "vendor": "node scripts/vendor.js",
-    "qa": "node scripts/browser-qa.js"
+    "qa": "node scripts/journey-qa.js"
   },
   "devDependencies": {
     "@gltf-transform/core": "4.2.1",
