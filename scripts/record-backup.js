@@ -15,20 +15,15 @@ try {
   const page = await context.newPage();
   await page.goto("http://127.0.0.1:4173/world.html?qa=1");
   await page.waitForFunction(() => window.__PROMY_QA__);
-  await page.evaluate(async () => {
-    const r = await import("./src/systems/runtime.js");
-    r.demo.hour = 18;
-  });
-  await page.locator("[data-checkin=meal]").click();
+  await page.locator("[data-care=water]").click();
   await page.waitForTimeout(3000);
-  await page.locator("[data-checkin=day]").click();
-  await page.locator("[data-checkin=home]").click();
+  await page.locator("#completeCare").click();
   await page.waitForTimeout(3000);
-  await page.locator("#actPromise").click();
-  await page.locator("#seal").click();
+  await page.locator("#openAlbum").click();
   await page.waitForTimeout(3000);
-  await page.locator("#actFinish").click();
-  await page.locator("#keep").click();
+  await page.locator("#stampAlbum [data-close]").click();
+  await page.locator("#shareDaily").click();
+  await page.waitForSelector(".share-dialog img");
   await page.waitForTimeout(3000);
   await page.evaluate(async () => {
     const r = await import("./src/systems/runtime.js");

@@ -64,6 +64,7 @@ export function buildZones(scene, assets, actions, low) {
     (batches[name] ??= []).push({ x, z, s, r, y });
   }
   const mail = assets.clone("mailbox");
+  mail.scale.setScalar(0.8);
   mail.position.set(0, 0, -1.3);
   scene.add(mail);
   at("postoffice", 0, -24, 1.1);
@@ -82,10 +83,18 @@ export function buildZones(scene, assets, actions, low) {
     label.position.set(x, 5, z - 5);
     scene.add(label);
   });
-  const campfire = assets.actor("campfire");
-  campfire.root.position.set(0, 0, 7);
-  campfire.play("flame");
-  scene.add(campfire.root);
+  const stamps = new T.InstancedMesh(
+    new T.BoxGeometry(0.65, 0.08, 0.9),
+    new T.MeshStandardMaterial({ color: 0xffffff }),
+    7,
+  );
+  for (let i = 0; i < 7; i++) {
+    dummy.position.set(-2.4 + i * 0.8, 0.45, 7);
+    dummy.rotation.set(0, 0, 0);
+    dummy.updateMatrix();
+    stamps.setMatrixAt(i, dummy.matrix);
+  }
+  scene.add(stamps);
   const dogs = [0, 1].map((i) => {
     const d = assets.actor("dog");
     d.root.position.set(-21 + i * 5, 0, -12);
@@ -93,12 +102,6 @@ export function buildZones(scene, assets, actions, low) {
     scene.add(d.root);
     return d;
   });
-  for (let i = 0; i < 100; i++) {
-    const row = Math.floor(i / 25),
-      a = ((i % 25) * Math.PI * 2) / 25,
-      r = 8 + row * 1.2;
-    at("seat", Math.cos(a) * r, Math.sin(a) * r, 1, -a);
-  }
   for (let i = 0; i < 10; i++) {
     const a = (i * Math.PI * 2) / 10;
     at("bench", Math.cos(a) * 16, Math.sin(a) * 16, 1, -a + Math.PI / 2);
@@ -149,9 +152,7 @@ export function buildZones(scene, assets, actions, low) {
   const staticBatches = {};
   for (const [name, transforms] of Object.entries(batches)) {
     if (/^(tree|bush|flower|seat)/.test(name))
-      scene.add(
-        assets.instances(name, transforms, { shadow: false }),
-      );
+      scene.add(assets.instances(name, transforms, { shadow: false }));
     else staticBatches[name] = transforms;
   }
   scene.add(assets.scenery(staticBatches));
@@ -249,16 +250,20 @@ export function buildZones(scene, assets, actions, low) {
         document.querySelector("[data-checkin]:not(:disabled)")?.focus(),
     },
     {
-      name: copy("text.126"),
+      name: copy("care.station"),
       at: new T.Vector3(0, 0, 7),
       radius: 3,
-      click: actions.hello,
+      click: () => document.querySelector("[data-care]")?.focus(),
     },
   );
   let pending = -1;
   function update(clock, milestone = 0) {
     const s = store.summary(clock);
     const level = Math.max(s.total, milestone);
+    const collected = s.total % 7 || (s.total ? 7 : 0);
+    for (let i = 0; i < 7; i++)
+      stamps.setColorAt(i, new T.Color(i < collected ? 0xffda91 : 0xc1c9b8));
+    stamps.instanceColor.needsUpdate = true;
     if (pending !== store.state.pending.length) {
       pending = store.state.pending.length;
       syncLanterns();
@@ -270,8 +275,9 @@ export function buildZones(scene, assets, actions, low) {
     ]) {
       const m = homeMaterials[name];
       if (m) {
-        m.emissiveIntensity = s.flags.includes(id) ? 1.1 : 0;
-        m.color.set(s.flags.includes(id) ? 0xffffff : 0x777777);
+        const lit = s.flags.includes(id) || s.flags.includes("care");
+        m.emissiveIntensity = lit ? 1.1 : 0;
+        m.color.set(lit ? 0xffffff : 0x777777);
       }
     }
     gold.visible = level >= 100;
@@ -284,7 +290,6 @@ export function buildZones(scene, assets, actions, low) {
   return {
     home,
     mail,
-    campfire,
     dogs,
     targets,
     update,

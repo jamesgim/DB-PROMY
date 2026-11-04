@@ -59,7 +59,11 @@ function sky(ctx, w, h, count, progress = 1) {
   }
 }
 function publicURL() {
-  const url = new URL("../../world.html", import.meta.url);
+  const url = new URL(
+    location.hostname === "127.0.0.1" || location.hostname === "localhost"
+      ? "https://jamesgim.github.io/DB-PROMY/world.html"
+      : new URL("../../world.html", import.meta.url),
+  );
   url.search = "?src=story";
   return url.href;
 }
@@ -72,12 +76,40 @@ async function makeCard(w, h, avatar) {
   text(ctx, copy("text.061"), w / 2, 95, 40);
   text(ctx, currentClock().day, w / 2, 150, 25, "#b9d8bf");
   if (avatar) {
-    const size = h > 1200 ? 720 : 520;
+    const size = h > 1200 ? 720 : 400;
     ctx.drawImage(avatar, (w - size) / 2, h * 0.18, size, size);
   } else {
     text(ctx, "✦", w / 2, h * 0.42, 160, "#ffd99a");
   }
   const y = h * 0.7;
+  const days = Object.keys(store.state.days)
+      .filter((d) => d <= currentClock().day)
+      .sort()
+      .slice(-7),
+    stampY = h > 1200 ? h * 0.6 : h * 0.57;
+  for (let i = 0; i < 7; i++) {
+    const x = 155 + i * 110;
+    ctx.fillStyle = days[i] ? "#ffda91" : "#36594c";
+    ctx.fillRect(x, stampY, 94, 68);
+    text(
+      ctx,
+      days[i] ? days[i].slice(5).replace("-", ".") : "·",
+      x + 47,
+      stampY + 43,
+      23,
+      days[i] ? "#173c2c" : "#a3b9a7",
+    );
+  }
+  const chosen = data.care.find((x) => x.id === s.letter?.id);
+  text(
+    ctx,
+    s.letter?.done && chosen
+      ? copy("share.today") + chosen.title
+      : copy("care.dailyRecord"),
+    w / 2,
+    y - 60,
+    30,
+  );
   text(
     ctx,
     copy("text.062") +
@@ -140,25 +172,57 @@ export async function openShare() {
       b.onclick = () => download(card.blob, card.name);
       dialog.append(b);
     }
-    const share = document.createElement("button");
-    share.textContent = copy("text.074");
-    share.onclick = async () => {
-      store.act("shareClicks");
-      const files = cards.map(
-        (x) => new File([x.blob], x.name, { type: "image/png" }),
-      );
-      if (navigator.canShare?.({ files })) {
-        try {
-          await navigator.share({ files, title: copy("text.075") });
-        } catch (e) {
-          if (e.name !== "AbortError")
-            dialog.querySelector("p").textContent = copy("text.076");
-        }
-      } else {
-        cards.forEach((x) => download(x.blob, x.name));
+    for (const [index, key] of [
+      [0, "share.story"],
+      [1, "share.feed"],
+    ]) {
+      const share = document.createElement("button");
+      share.textContent = copy(key);
+      share.dataset.instagram = index === 0 ? "story" : "feed";
+      share.onclick = async () => {
+        const card = cards[index],
+          files = [new File([card.blob], card.name, { type: "image/png" })];
+        store.act("shareClicks");
+        if (
+          typeof navigator.share === "function" &&
+          navigator.canShare?.({ files })
+        ) {
+          dialog.querySelector("p").textContent = copy("share.guide");
+          try {
+            await navigator.share({ files });
+            dialog.querySelector("p").textContent = copy("share.handed");
+          } catch (e) {
+            dialog.querySelector("p").textContent = copy(
+              e.name === "AbortError" ? "share.cancelled" : "share.manual",
+            );
+          }
+        } else dialog.querySelector("p").textContent = copy("share.manual");
+      };
+      dialog.append(share);
+    }
+    const caption = document.createElement("button");
+    caption.textContent = copy("share.caption");
+    caption.onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(
+          copy("share.captionText").replace(
+            "{n}",
+            store.summary(currentClock()).total,
+          ),
+        );
+        dialog.querySelector("p").textContent = copy("share.copied");
+      } catch {
+        dialog.querySelector("p").textContent = copy("share.copyFailed");
       }
     };
-    dialog.append(share);
+    dialog.append(caption);
+    const instagram = document.createElement("a");
+    instagram.textContent = copy("share.open");
+    instagram.href = "https://www.instagram.com/";
+    instagram.target = "_blank";
+    instagram.rel = "noopener noreferrer";
+    instagram.className = "instagram-open";
+    dialog.append(instagram);
   } catch {
     dialog.querySelector("p").textContent = copy("text.077");
   }

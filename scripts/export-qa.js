@@ -13,6 +13,7 @@ try {
   await page.goto("http://127.0.0.1:4173/fallback.html?admin=1");
   await page.locator(".admin-panel summary").click();
   await page.selectOption("#demoHour", "18");
+  await page.locator(".evening-checks").evaluate((el) => (el.open = true));
   await page.locator("[data-checkin=home]").click();
   await page.locator("#fallbackPromise").click();
   await page.locator("#fallbackFinish").click();

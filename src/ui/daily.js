@@ -9,6 +9,7 @@ import {
 } from "../systems/runtime.js";
 import { presence } from "../systems/presence.js";
 import { openShare, exportEditorial, recordTimelapse } from "./share.js";
+import { mountCare } from "./care.js";
 export function toast(text) {
   const el = document.getElementById("toast");
   if (!el) return;
@@ -28,6 +29,7 @@ export function mountDaily({
   panel.setAttribute("aria-label", copy("text.025"));
   panel.innerHTML = copy("text.026");
   (document.querySelector(".fallback-layout") ?? document.body).append(panel);
+  mountCare(panel, toast);
   const buttons = panel.querySelector(".checks");
   for (const item of data.checkin.standard) {
     const b = document.createElement("button");
@@ -83,22 +85,27 @@ export function mountDaily({
     });
     const reward = data.rewards.filter((x) => s.total >= x.days).at(-1);
     document.getElementById("dailyMessage").textContent =
-      (s.flags.length === 3
-        ? copy("text.033")
-        : s.flags.length
-          ? copy("text.034")
-          : c.hour < 17 && !c.demo
-            ? copy("text.035")
-            : copy("text.036")) +
+      (s.letter?.done
+        ? copy("care.done")
+        : s.flags.filter((x) => x !== "care").length === 3
+          ? copy("text.033")
+          : s.flags.length
+            ? copy("text.034")
+            : c.hour < 17 && !c.demo
+              ? copy("text.035")
+              : copy("text.036")) +
       (s.coupon ? copy("text.037") : copy("text.028")) +
       (reward ? " · " + reward.label : "");
-    document.getElementById("dailyNeighbors").textContent =
-      (spectate ? copy("text.038") : "") +
-      p.label +
-      " " +
-      p.neighbors +
-      copy("text.039") +
-      (s.flags.length ? copy("text.040") : copy("text.041"));
+    document.getElementById("dailyNeighbors").textContent = spectate
+      ? copy("text.038") +
+        p.label +
+        " " +
+        p.neighbors +
+        copy("text.039") +
+        (s.flags.length ? copy("text.040") : copy("text.041"))
+      : copy("care.optionalCount")
+          .replace("{pending}", store.state.pending.length)
+          .replace("{done}", store.state.done);
     document.getElementById("storageNote").textContent = store.available
       ? copy("text.042")
       : copy("text.043");

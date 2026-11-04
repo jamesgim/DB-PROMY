@@ -1,7 +1,9 @@
 import { copy } from "../data/copy.js";
 import { kst, dayNumber, weekKey } from "./clock.js";
-export const KEY = "promy.world.v1";
-const IDS = ["meal", "day", "home"];
+export const KEY = "promy.world.v2";
+const LEGACY_KEY = "promy.world.v1";
+const IDS = ["meal", "day", "home", "care"];
+const CARE_IDS = ["water", "pause", "safe"];
 const SOURCES = ["reels", "story", "blog", "qr-camp", "qr-concert", "kakao"];
 const NAMES = [
   copy("text.002"),
@@ -19,11 +21,12 @@ const validDay = (d) =>
 const count = (n) => (Number.isInteger(n) && n >= 0 && n <= 100000 ? n : 0);
 export function fresh(variant = Math.floor(Math.random() * 6)) {
   return {
-    version: 1,
+    version: 2,
     variant,
     house: variant,
     name: NAMES[variant],
     days: {},
+    letters: {},
     grace: [],
     pending: [],
     done: 0,
@@ -34,9 +37,13 @@ export function fresh(variant = Math.floor(Math.random() * 6)) {
 }
 // Explicit allowlist: unknown fields, names, promise text and arbitrary URL values never persist.
 export function migrate(raw) {
-  if (!raw || raw.version !== 1) return fresh();
+  if (!raw || ![1, 2].includes(raw.version)) return fresh();
   const next = fresh(count(raw.variant) % 6);
   next.house = count(raw.house) % 6;
+  for (const [day, letter] of Object.entries(raw.letters ?? {})) {
+    if (validDay(day) && letter && CARE_IDS.includes(letter.id))
+      next.letters[day] = { id: letter.id, done: letter.done === true };
+  }
   for (const [day, flags] of Object.entries(raw.days ?? {})) {
     if (validDay(day) && Array.isArray(flags)) {
       const clean = IDS.filter((id) => flags.includes(id));
@@ -93,7 +100,11 @@ export function summary(state, day) {
     flags: state.days[day] ?? [],
     coupon: !state.grace.some((d) => weekKey(d) === weekKey(day)),
     stars:
-      state.done + actual.filter((d) => state.days[d].includes("home")).length,
+      state.done +
+      actual.filter((d) =>
+        state.days[d].some((x) => x === "home" || x === "care"),
+      ).length,
+    letter: state.letters?.[day] ?? null,
   };
 }
 export function createStore({
@@ -104,7 +115,11 @@ export function createStore({
   let state,
     available = true;
   try {
-    state = migrate(JSON.parse(storage?.getItem(KEY) ?? "null"));
+    state = migrate(
+      JSON.parse(
+        storage?.getItem(KEY) ?? storage?.getItem(LEGACY_KEY) ?? "null",
+      ),
+    );
   } catch {
     state = fresh();
   }
@@ -122,10 +137,25 @@ export function createStore({
   function act(type, payload, clock = kst(now())) {
     if (spectate) return false;
     const day = clock.day;
+    if (type === "chooseCare") {
+      if (!CARE_IDS.includes(payload) || state.letters[day]?.done) return false;
+      state.letters[day] = { id: payload, done: false };
+      save();
+      emit();
+      return true;
+    }
+    if (type === "completeCare") {
+      if (!state.letters[day] || state.letters[day].done) return false;
+      state.letters[day].done = true;
+      payload = "care";
+      type = "checkin";
+    }
     if (type === "checkin") {
       if (
         !IDS.includes(payload) ||
-        (clock.hour < (payload === "home" ? 18 : 17) && !clock.demo)
+        (payload !== "care" &&
+          clock.hour < (payload === "home" ? 18 : 17) &&
+          !clock.demo)
       )
         return false;
       if (state.days[day]?.includes(payload)) return false;

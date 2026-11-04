@@ -1,7 +1,7 @@
 import catalog from "./copy.ko.json" with { type: "json" };
 export const copy = (key) => catalog[key] ?? key;
 export function resolveCopy(value) {
-  if (typeof value === "string" && value.startsWith("$text."))
+  if (typeof value === "string" && value.startsWith("$"))
     return copy(value.slice(1));
   if (Array.isArray(value)) return value.map(resolveCopy);
   if (value && typeof value === "object")

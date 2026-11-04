@@ -59,11 +59,17 @@ function draw() {
   ctx.lineTo(665, 135);
   ctx.lineTo(770, 210);
   ctx.fill();
-  ctx.fillStyle = s.flags.includes("home") ? "#ffe49e" : "#315452";
+  ctx.fillStyle = s.flags.some((x) => x === "home" || x === "care")
+    ? "#ffe49e"
+    : "#315452";
   ctx.fillRect(602, 240, 40, 45);
-  ctx.fillStyle = s.flags.includes("meal") ? "#ffe49e" : "#315452";
+  ctx.fillStyle = s.flags.some((x) => x === "meal" || x === "care")
+    ? "#ffe49e"
+    : "#315452";
   ctx.fillRect(688, 240, 40, 45);
-  ctx.fillStyle = s.flags.includes("day") ? "#ffe49e" : "#785746";
+  ctx.fillStyle = s.flags.some((x) => x === "day" || x === "care")
+    ? "#ffe49e"
+    : "#785746";
   ctx.fillRect(645, 270, 37, 70);
   ctx.fillStyle = "#b95146";
   ctx.fillRect(370, 230, 75, 100);
@@ -116,7 +122,7 @@ function draw() {
     copy("text.058") +
     store.state.done +
     copy("text.059") +
-    s.flags.length +
+    s.flags.filter((x) => x !== "care").length +
     "/3";
 }
 mountDaily({

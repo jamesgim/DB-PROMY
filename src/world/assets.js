@@ -5,9 +5,9 @@ import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 export async function loadAssets(progress) {
   const draco = new DRACOLoader().setDecoderPath("./assets/vendor/draco/");
   const loader = new GLTFLoader().setDRACOLoader(draco);
-  const manifest = await fetch("./assets/glb/manifest.json").then((r) =>
-    r.json(),
-  );
+  const manifest = (
+    await fetch("./assets/glb/manifest.json").then((r) => r.json())
+  ).filter((x) => !["campfire", "seat"].includes(x.name));
   let completed = 0;
   const material = new T.MeshStandardMaterial({
     map: await new T.TextureLoader().loadAsync("./assets/atlas.png"),

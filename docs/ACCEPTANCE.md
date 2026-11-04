@@ -1,5 +1,15 @@
 # Issue #1 acceptance record
 
+## Revision following user feedback, 2026-11-05
+
+The daily core now works at any KST hour: choose an ordinary care action, perform it outside the app, confirm it, earn one daily stamp, and revisit a dated album / seven-stamp postcard. Completion is self-reported, not monitored or verified. Evening checks remain optional. v2 storage migrates v1 dates/promises/stars and keeps the old key intact so an already-open old tab cannot erase new care records.
+
+Player height is approximately 2.16 world units, with NPCs scaled consistently against doors/furniture. Overlapping left status copy is hidden. Campfire interaction and the 100 log-seat layout are removed; their legacy GLBs are no longer loaded. The hub has a seven-stamp record stand and home lights respond to care completion.
+
+Instagram-oriented sharing sends one real PNG at a time (1080x1920 or 1080x1080) into native Web Share, with explicit OS target selection and final posting in Instagram. Unsupported browsers get save/caption/app-link instructions; cancellation never claims success. The website cannot force a share target or verify Instagram posting, per https://www.w3.org/TR/web-share/ . There is no Instagram publishing API integration or automatic account posting.
+
+13 automated state/asset tests pass. `scripts/improvements-qa.js` checks the new loop, reload, album, actual PNG dimensions, single-file handoff, cancellation/unsupported paths, mobile and fallback. Native share is mocked for payload assertions; real Instagram posting is **not** claimed verified. These updates supersede the earlier core/scene descriptions below. Retention and brand fit still require user testing; collecting stamps is not evidence of proven daily retention.
+
 The user-provided v1.0 brief and PC/NPC references were read locally. They remain outside this public repository. `AGENTS.md` is unchanged. The submitted GLBs are independently authored geometric models, with animated mesh nodes. They do not embed source images or constitute approved production character likeness.
 
 ## Implemented

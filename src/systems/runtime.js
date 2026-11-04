@@ -51,10 +51,11 @@ store.act("visit", params.get("src"));
 store.act("name", params.get("name"));
 console.info("PROMY local referral metrics", store.state.metrics.visits);
 export const data = await Promise.all(
-  ["checkin", "brand", "categories", "rewards"].map(loadData),
-).then(([checkin, brand, categories, rewards]) => ({
+  ["checkin", "brand", "categories", "rewards", "care"].map(loadData),
+).then(([checkin, brand, categories, rewards, care]) => ({
   checkin,
   brand,
   categories,
   rewards,
+  care,
 }));

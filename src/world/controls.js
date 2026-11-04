@@ -9,7 +9,7 @@ export function controls(
   const input = {
     yaw: 0.65,
     pitch: 0.68,
-    distance: spectate ? 48 : 18,
+    distance: spectate ? 48 : 13,
     keys: {},
     joy: { x: 0, y: 0 },
     near: null,
@@ -124,7 +124,7 @@ export function controls(
     }
     const target = spectate
       ? new T.Vector3(0, 2, 0)
-      : player.position.clone().add(new T.Vector3(0, 1.9, 0));
+      : player.position.clone().add(new T.Vector3(0, 1.0, 0));
     if (spectate) input.yaw += dt * 0.035;
     const horizontal = input.distance * Math.cos(input.pitch);
     const dest = target

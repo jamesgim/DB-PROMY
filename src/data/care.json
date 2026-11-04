@@ -1,0 +1,17 @@
+[
+  {
+    "id": "water",
+    "title": "$care.water.title",
+    "action": "$care.water.action"
+  },
+  {
+    "id": "pause",
+    "title": "$care.pause.title",
+    "action": "$care.pause.action"
+  },
+  {
+    "id": "safe",
+    "title": "$care.safe.title",
+    "action": "$care.safe.action"
+  }
+]

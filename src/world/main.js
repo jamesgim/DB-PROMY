@@ -49,6 +49,7 @@ export async function startWorld() {
         copy("text.097") + Math.round(p * 100) + "%"),
   );
   const player = assets.actor("player");
+  player.root.scale.setScalar(0.43);
   player.root.position.set(1, 0, 6);
   player.play("idle");
   scene.add(player.root);
@@ -67,7 +68,7 @@ export async function startWorld() {
   for (let i = 0; i < (low ? 1 : 2); i++) {
     const actor = assets.actor("promy");
     actor.root.position.set(i ? 10 : 0, 0, i ? -6 : -5);
-    actor.root.scale.setScalar(i ? 0.62 : 0.8);
+    actor.root.scale.setScalar(0.48);
     if (i) {
       actor.root.getObjectByName("PostmasterHat").visible = false;
       actor.root.getObjectByName("PostmasterBag").visible = false;
@@ -198,10 +199,19 @@ export async function startWorld() {
     player.root.position.set(0, 0, 40);
     input.yaw = 0.05;
     input.pitch = 0.55;
-    input.distance = 17;
+    input.distance = 12;
     toast(copy("text.108"));
   });
+  let lastCheck = store.summary(currentClock()).flags.join(",");
   store.subscribe(() => {
+    const next = store.summary(currentClock()).flags.join(",");
+    if (next !== lastCheck) {
+      player.play("check_in", true);
+      lastCheck = next;
+    }
+  });
+  window.addEventListener("promy:care", () => {
+    window.dispatchEvent(new Event("promy:home"));
     player.play("check_in", true);
   });
   $("soundBtn").onclick = () => toast(copy("text.109"));
@@ -237,7 +247,6 @@ export async function startWorld() {
       }
       n.mixer.update(dt);
     });
-    zones.campfire.mixer.update(dt);
     sky.update(c, s, dt, now < ritualUntil);
     effects.material.opacity = Math.max(0, (cheerUntil - now) / 2800);
     effects.rotation.y += dt * 0.5;
@@ -292,6 +301,10 @@ export async function startWorld() {
         ritual: now < ritualUntil,
         phase: c.phase,
         models: ["player", "promy"],
+        playerHeight: new T.Box3()
+          .setFromObject(player.root)
+          .getSize(new T.Vector3()).y,
+        hasCampfire: !!scene.getObjectByName("Campfire"),
       };
   }
   setCapture(() => {
