@@ -2,8 +2,17 @@ import { mountDaily } from "./ui/daily.js";
 import { hydrateCopy } from "./data/copy.js";
 import { currentClock } from "./systems/runtime.js";
 hydrateCopy();
-if ("serviceWorker" in navigator)
+if ("serviceWorker" in navigator) {
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloading = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (hadController && !reloading) {
+      reloading = true;
+      location.reload();
+    }
+  });
   navigator.serviceWorker.register("./sw.js").catch(() => {});
+}
 const params = new URLSearchParams(location.search);
 const fallbackURL = "./fallback.html" + location.search;
 if (params.get("fallback") === "1") location.replace(fallbackURL);

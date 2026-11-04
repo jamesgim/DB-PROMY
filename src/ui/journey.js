@@ -79,7 +79,6 @@ export function mountJourney(panel, toast) {
   }
   window.addEventListener("keydown", (e) => {
     if (
-      demonstration &&
       !spectate &&
       !e.ctrlKey &&
       !e.metaKey &&
@@ -89,11 +88,25 @@ export function mountJourney(panel, toast) {
       ["Digit8", "Numpad8", "Digit7", "Numpad7"].includes(e.code)
     ) {
       e.preventDefault();
-      store.act(
-        e.code.endsWith("8") ? "addSkyBirthday" : "resetSkyBirthdays",
-        null,
-        currentClock(),
-      );
+      const adding = e.code.endsWith("8");
+      if (
+        store.act(
+          adding ? "addSkyBirthday" : "resetSkyBirthdays",
+          null,
+          currentClock(),
+        ) &&
+        adding
+      ) {
+        document
+          .querySelectorAll("dialog[open]:not(#skyCanvasDialog)")
+          .forEach((d) => d.close());
+        document.querySelector(".modal-back.open")?.classList.remove("open");
+        window.dispatchEvent(
+          new CustomEvent("promy:stars", {
+            detail: { birthdayIndex: store.state.personalStars.skyCount - 1 },
+          }),
+        );
+      }
       return;
     }
     if (

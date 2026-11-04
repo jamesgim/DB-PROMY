@@ -410,3 +410,25 @@ export function skyBirthdays(count) {
     return { ...birthday, sign: zodiacFor(birthday) };
   });
 }
+
+export function skyPose(index) {
+  return {
+    azimuth: index * 2.399963,
+    elevation: 0.4 + (((index * 37) % 365) / 365) * 0.9,
+  };
+}
+export function skyPoint(index, [x, y], size = 9) {
+  const { azimuth: a, elevation: e } = skyPose(index),
+    r = 70,
+    ce = Math.cos(e),
+    se = Math.sin(e),
+    sa = Math.sin(a),
+    ca = Math.cos(a),
+    u = (x - 0.5) * size,
+    v = (0.5 - y) * size;
+  return [
+    sa * ce * r + ca * u - sa * se * v,
+    4 + se * r + ce * v,
+    -ca * ce * r + sa * u + ca * se * v,
+  ];
+}

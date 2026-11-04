@@ -1,7 +1,11 @@
 import * as T from "three";
 import { store, currentClock } from "../systems/runtime.js";
 
-import { constellationLines, skyBirthdays } from "../systems/stars.js";
+import {
+  constellationLines,
+  skyBirthdays,
+  skyPoint,
+} from "../systems/stars.js";
 import { copy } from "../data/copy.js";
 const CENTERS = [
   [-5, 7],
@@ -103,13 +107,17 @@ export function createJourneyWorld(scene) {
   cg.setAttribute("position", new T.Float32BufferAttribute([], 3));
   clg.setAttribute("position", new T.Float32BufferAttribute([], 3));
   scene.add(
-    new T.Points(cg, new T.PointsMaterial({ color: 0xb5dcd9, size: 0.1 })),
+    new T.Points(
+      cg,
+      new T.PointsMaterial({ color: 0xf4eac9, size: 0.38, fog: false }),
+    ),
     new T.LineSegments(
       clg,
       new T.LineBasicMaterial({
-        color: 0x79b6be,
+        color: 0xb6d7e7,
+        fog: false,
         transparent: true,
-        opacity: 0.55,
+        opacity: 0.9,
       }),
     ),
   );
@@ -134,7 +142,7 @@ export function createJourneyWorld(scene) {
     cachedProgress = store.journey(c);
     personal = store.stars(c);
     const reveal = constellationLines(personal.sign, personal.visits),
-      map = ([x, y]) => [(x - 0.5) * 14, 19 + (1 - y) * 12, -24];
+      map = ([x, y]) => [(x - 0.5) * 14, 53 + (1 - y) * 12, -42];
     fill(sg, reveal.points.flatMap(map));
     fill(
       lg,
@@ -146,11 +154,7 @@ export function createJourneyWorld(scene) {
       const dots = [],
         edges = [];
       skyBirthdays(count).forEach(({ sign }, i) => {
-        const angle = i * 2.399963,
-          r = 14 + Math.sqrt(i / 365) * 29,
-          cx = Math.cos(angle) * r,
-          cy = 25 + Math.sin(angle) * r * 0.55,
-          map = ([x, y]) => [cx + (x - 0.5) * 2.7, cy + (1 - y) * 2.2, -27];
+        const map = (point) => skyPoint(i, point);
         dots.push(...sign.points.flatMap(map));
         edges.push(
           ...sign.links.flatMap(([a, b]) => [

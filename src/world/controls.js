@@ -7,6 +7,8 @@ export function controls(
   { targets, onInteract, modalOpen },
 ) {
   const input = {
+    skyYaw: 0,
+    skyElevation: 0.75,
     yaw: 0.65,
     pitch: 0.68,
     distance: spectate ? 48 : 13,
@@ -91,8 +93,13 @@ export function controls(
     const dx = e.clientX - drag.x,
       dy = e.clientY - drag.y;
     drag.total += Math.abs(dx) + Math.abs(dy);
-    input.yaw -= dx * 0.005;
-    input.pitch = clamp(input.pitch + dy * 0.003, 0.23, 1.23);
+    if (input.view === "stars") {
+      input.skyYaw -= dx * 0.005;
+      input.skyElevation = clamp(input.skyElevation - dy * 0.003, 0.05, 1.5);
+    } else {
+      input.yaw -= dx * 0.005;
+      input.pitch = clamp(input.pitch + dy * 0.003, 0.23, 1.23);
+    }
     drag.x = e.clientX;
     drag.y = e.clientY;
   });
@@ -163,14 +170,24 @@ export function controls(
     const l = Math.hypot(x, z);
     input.moving = l > 0.1 && !spectate && !modalOpen();
     if (input.moving) input.view = null;
-    if (input.view === "towers" || input.view === "stars") {
-      const stars = input.view === "stars",
-        dest = stars ? new T.Vector3(0, 23, 53) : new T.Vector3(12, 10, 23),
-        target = stars ? new T.Vector3(0, 25, -25) : new T.Vector3(0, 2.5, 6);
-      camera.position.lerp(dest, 1 - Math.exp(-4 * dt));
-      camera.lookAt(target);
-      document.getElementById("nearPrompt").classList.remove("show");
+    if (input.view === "stars") {
+      camera.position.set(0, 4, 0);
+      const e = input.skyElevation,
+        a = input.skyYaw;
+      camera.lookAt(
+        Math.sin(a) * Math.cos(e) * 70,
+        4 + Math.sin(e) * 70,
+        -Math.cos(a) * Math.cos(e) * 70,
+      );
       input.near = null;
+      document.getElementById("nearPrompt").classList.remove("show");
+      return;
+    }
+    if (input.view === "towers") {
+      camera.position.lerp(new T.Vector3(12, 10, 23), 1 - Math.exp(-4 * dt));
+      camera.lookAt(0, 2.5, 6);
+      input.near = null;
+      document.getElementById("nearPrompt").classList.remove("show");
       return;
     }
     if (input.moving) {

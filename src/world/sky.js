@@ -53,7 +53,9 @@ export function createSky(scene, low) {
           c.hour < 6 ||
           document.body.classList.contains("viewing-sky"),
         target = night ? 1 : 0;
-      blend = T.MathUtils.damp(blend, target, 2, dt);
+      blend = document.body.classList.contains("viewing-sky")
+        ? 1
+        : T.MathUtils.damp(blend, target, 2, dt);
       const color = new T.Color(0x88bcb4).lerp(
         new T.Color(c.hour < 6 ? 0x0d2136 : 0x102c41),
         blend,

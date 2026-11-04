@@ -8,6 +8,7 @@ import { store, currentClock, demo, spectate } from "../systems/runtime.js";
 import { mountCampaign } from "../ui/campaign.js";
 import { toast } from "../ui/daily.js";
 import { setCapture, setVideoSource } from "../ui/share.js";
+import { skyPose, skyBirthdays } from "../systems/stars.js";
 import { createJourneyWorld } from "./journey.js";
 export async function startWorld() {
   const $ = (id) => document.getElementById(id),
@@ -157,6 +158,7 @@ export async function startWorld() {
       $("modal").classList.contains("open") ||
       !!document.querySelector("dialog[open]"),
     onInteract: (e) => {
+      if (input.view === "stars") return;
       const p = new T.Vector2(
           (e.clientX / innerWidth) * 2 - 1,
           (-e.clientY / innerHeight) * 2 + 1,
@@ -230,16 +232,39 @@ export async function startWorld() {
   skyBar.append(caption, back);
   document.body.append(skyBar);
   let beforeSky = null;
-  window.addEventListener("promy:stars", () => {
+  window.addEventListener("promy:stars", (event) => {
     if (input.view !== "stars")
       beforeSky = {
         view: input.view,
         camera: camera.position.clone(),
         quaternion: camera.quaternion.clone(),
       };
+    if (Number.isInteger(event.detail?.birthdayIndex)) {
+      const pose = skyPose(event.detail.birthdayIndex);
+      input.skyYaw = pose.azimuth;
+      input.skyElevation = pose.elevation;
+    } else {
+      input.skyYaw = 0;
+      input.skyElevation = 0.9;
+    }
     input.view = "stars";
     skyBar.hidden = false;
   });
+  const updateSkyCaption = () => {
+    const count = store.state.personalStars.skyCount,
+      birth = skyBirthdays(count).at(-1);
+    caption.textContent =
+      copy("sky.info") +
+      (birth
+        ? " · " +
+          copy("sky.birthdayAdded")
+            .replace("{month}", birth.month)
+            .replace("{day}", birth.day)
+            .replace("{n}", count)
+        : "");
+  };
+  store.subscribe(updateSkyCaption);
+  updateSkyCaption();
   back.onclick = () => {
     if (beforeSky) {
       input.view = beforeSky.view;
@@ -378,6 +403,8 @@ export async function startWorld() {
         player: [player.root.position.x, player.root.position.z],
         camera: camera.position.toArray(),
         view: input.view ?? null,
+        skyYaw: input.skyYaw,
+        skyElevation: input.skyElevation,
         homeLit: s.flags.slice(),
         ritual: now < ritualUntil,
         phase: c.phase,

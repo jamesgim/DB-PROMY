@@ -29,7 +29,7 @@ const version = "promy-" + hash.digest("hex").slice(0, 12);
 const script = `const CACHE=${JSON.stringify(version)},CORE=${JSON.stringify(core.map((p) => "./" + p))};
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('promy-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(u.origin!==location.origin||e.request.method!=='GET'||u.pathname.includes('/assets/video/'))return;e.respondWith(caches.open(CACHE).then(async c=>(await c.match(e.request,{ignoreSearch:true}))??fetch(e.request)));});
+self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(u.origin!==location.origin||e.request.method!=='GET'||u.pathname.includes('/assets/video/'))return;const live=/\\.(html|js|css|json)$/.test(u.pathname);e.respondWith(caches.open(CACHE).then(async c=>{const saved=()=>c.match(e.request,{ignoreSearch:true});if(live){try{const response=await fetch(e.request);if(response.ok)await c.put(e.request,response.clone());return response;}catch(error){const cached=await saved();if(cached)return cached;throw error;}}return (await saved())??fetch(e.request);}));});
 `;
 await fs.writeFile("sw.js", script);
 console.log("Offline core:", core.length, "files,", version);

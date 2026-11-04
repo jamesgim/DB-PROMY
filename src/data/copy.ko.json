@@ -363,5 +363,6 @@
   "sky.view": "하늘 보기",
   "sky.back": "동네로 돌아가기",
   "sky.info": "나의 별과 함께 그린 하늘 · 이웃 별자리는 시뮬레이션",
-  "tower.promise": "약속"
+  "tower.promise": "약속",
+  "sky.birthdayAdded": "{month}월 {day}일생 · {n}개의 별자리"
 }

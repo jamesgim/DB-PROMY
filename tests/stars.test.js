@@ -103,3 +103,18 @@ test("real visit cycle also resets once, and duplicate 366th session cannot incr
   assert.equal(s.act("recordVisit", "session_real_365", c), false);
   assert.equal(createStore({ storage }).stars(c).visits, 0);
 });
+
+test("sky shortcuts work outside demo and place birthday constellations around a full dome", async () => {
+  const { skyPoint } = await import("../src/systems/stars.js");
+  const s = createStore({ storage: memory() });
+  s.act("addSkyBirthday", null, c);
+  s.act("addSkyBirthday", null, c);
+  assert.equal(s.state.personalStars.skyCount, 2);
+  const points = Array.from({ length: 365 }, (_, i) => skyPoint(i, [0.5, 0.5]));
+  assert.ok(points.some((p) => p[0] > 60));
+  assert.ok(points.some((p) => p[0] < -60));
+  assert.ok(points.some((p) => p[2] > 60));
+  assert.ok(points.some((p) => p[2] < -60));
+  s.act("resetSkyBirthdays", null, c);
+  assert.equal(s.state.personalStars.skyCount, 0);
+});

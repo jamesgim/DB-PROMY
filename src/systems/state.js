@@ -160,7 +160,6 @@ export function createStore({
     if (spectate) return false;
     const day = clock.day;
     if (["addSkyBirthday", "resetSkyBirthdays"].includes(type)) {
-      if (!demonstration) return false;
       state.personalStars.skyCount =
         type === "resetSkyBirthdays"
           ? 0
