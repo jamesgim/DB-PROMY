@@ -125,3 +125,46 @@ test("spectators cannot place or draw even in demo mode", () => {
   assert.equal(s.act("demoStone", null, clock()), false);
   assert.equal(s.act("drawReward", "tower-1", clock()), false);
 });
+
+test("0 resets demo towers/rewards only and 9 resets demo visits only, retaining birthday and real records", () => {
+  const storage = memory(),
+    real = createStore({ storage });
+  const c = clock();
+  complete(real, 0);
+  real.act("placeStone", null, c);
+  real.act("recordVisit", "real_session_1", c);
+  const s = createStore({ storage, demonstration: true });
+  s.act("setBirthday", { month: 9, day: 10 }, c);
+  for (let i = 0; i < 100; i++) {
+    s.act("demoStone", null, c);
+    s.act("demoVisit", null, c);
+  }
+  s.act("drawReward", "tower-1", c);
+  assert.ok(s.act("resetDemoTowers", null, c));
+  assert.equal(s.journey(c).stones, 0);
+  assert.deepEqual(s.journey(c).draws, {});
+  assert.equal(s.stars(c).visits, 100);
+  s.act("demoStone", null, c);
+  assert.ok(s.act("resetDemoStars", null, c));
+  assert.equal(s.stars(c).visits, 0);
+  assert.equal(s.stars(c).unlocked, false);
+  assert.deepEqual(s.state.personalStars.demo.milestones, {});
+  assert.equal(s.journey(c).stones, 1);
+  assert.deepEqual(s.stars(c).birthday, { month: 9, day: 10 });
+  const reload = createStore({ storage, demonstration: true });
+  assert.equal(reload.stars(c).visits, 0);
+  assert.equal(reload.journey(c).stones, 1);
+  const r = createStore({ storage });
+  assert.equal(r.journey(c).stones, 1);
+  assert.equal(r.stars(c).visits, 1);
+  assert.equal(r.act("resetDemoTowers", null, c), false);
+  assert.equal(r.act("resetDemoStars", null, c), false);
+  assert.equal(
+    createStore({ storage, demonstration: true, spectate: true }).act(
+      "resetDemoTowers",
+      null,
+      c,
+    ),
+    false,
+  );
+});

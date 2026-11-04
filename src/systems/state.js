@@ -198,13 +198,16 @@ export function createStore({
         "demoConfirm",
         "drawReward",
         "resetDemo",
+        "resetDemoTowers",
+        "resetDemoStars",
       ].includes(type)
     ) {
       const p = journeyProgress(state, day, demonstration);
-      if (type === "resetDemo") {
+      if (["resetDemo", "resetDemoTowers", "resetDemoStars"].includes(type)) {
         if (!demonstration) return false;
-        state.journey.demo = freshJourney().demo;
-        state.personalStars.demo = freshStars().demo;
+        if (type !== "resetDemoStars") state.journey.demo = freshJourney().demo;
+        if (type !== "resetDemoTowers")
+          state.personalStars.demo = freshStars().demo;
       } else if (type === "placeStone") {
         if (demonstration || !p.canPlace) return false;
         state.journey.placedDays.push(day);

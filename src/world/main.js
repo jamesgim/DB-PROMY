@@ -238,7 +238,6 @@ export async function startWorld() {
       );
     }
   });
-  $("soundBtn").onclick = () => toast(copy("text.109"));
   $("reset").onclick = () => {
     if (!spectate && confirm(copy("text.110"))) {
       store.act(store.demonstration ? "resetDemo" : "reset");

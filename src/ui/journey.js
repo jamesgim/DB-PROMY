@@ -64,7 +64,36 @@ export function mountJourney(panel, toast) {
     }
   }
   place.onclick = putStone;
+  function resetPart(type) {
+    if (store.act(type, null, currentClock())) {
+      if (type === "resetDemoTowers")
+        document.getElementById("journeyRewards")?.close();
+      toast(
+        copy(
+          type === "resetDemoTowers"
+            ? "journey.resetTowersDone"
+            : "stars.resetDone",
+        ),
+      );
+    }
+  }
   window.addEventListener("keydown", (e) => {
+    if (
+      demonstration &&
+      !spectate &&
+      !e.ctrlKey &&
+      !e.metaKey &&
+      !e.altKey &&
+      !e.repeat &&
+      !e.target.closest("input,select,textarea")
+    ) {
+      if (["Digit0", "Numpad0", "Digit9", "Numpad9"].includes(e.code)) {
+        e.preventDefault();
+        resetPart(e.code.endsWith("0") ? "resetDemoTowers" : "resetDemoStars");
+        return;
+      }
+    }
+
     if (
       demonstration &&
       !spectate &&
@@ -114,7 +143,15 @@ export function mountJourney(panel, toast) {
     reset.id = "resetJourneyDemo";
     reset.textContent = copy("journey.resetDemo");
     reset.onclick = () => store.act("resetDemo", null, currentClock());
-    root.append(reset);
+    const towers = document.createElement("button");
+    towers.id = "resetTowerDemo";
+    towers.textContent = copy("journey.resetTowers");
+    towers.onclick = () => resetPart("resetDemoTowers");
+    const stars = document.createElement("button");
+    stars.id = "resetStarDemo";
+    stars.textContent = copy("stars.reset");
+    stars.onclick = () => resetPart("resetDemoStars");
+    root.append(towers, stars, reset);
   }
   function update() {
     const s = store.summary(currentClock()),

@@ -11,6 +11,7 @@ import {
 import { presence } from "../systems/presence.js";
 import { openShare, exportEditorial, recordTimelapse } from "./share.js";
 import { mountCare } from "./care.js";
+import { mountSound } from "./sound.js";
 export function toast(text) {
   const el = document.getElementById("toast");
   if (!el) return;
@@ -31,6 +32,7 @@ export function mountDaily({
   panel.innerHTML = copy("text.026");
   (document.querySelector(".fallback-layout") ?? document.body).append(panel);
   mountCare(panel, toast);
+  mountSound(panel, toast);
   const buttons = panel.querySelector(".checks");
   for (const item of data.checkin.standard) {
     const b = document.createElement("button");

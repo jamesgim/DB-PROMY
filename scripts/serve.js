@@ -9,6 +9,7 @@ const types = {
   ".css": "text/css",
   ".glb": "model/gltf-binary",
   ".png": "image/png",
+  ".mp3": "audio/mpeg",
   ".wasm": "application/wasm",
 };
 http

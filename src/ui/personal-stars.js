@@ -204,7 +204,11 @@ export function openPersonalStars() {
     add.id = "addStarVisit";
     add.textContent = copy("stars.demoAdd");
     add.onclick = () => store.act("demoVisit", null, currentClock());
-    d.querySelector("#starVisitAction").append(add);
+    const reset = document.createElement("button");
+    reset.id = "resetPersonalStars";
+    reset.textContent = copy("stars.reset");
+    reset.onclick = () => store.act("resetDemoStars", null, currentClock());
+    d.querySelector("#starVisitAction").append(add, reset);
   }
   let cardKey = "",
     abort = null;
