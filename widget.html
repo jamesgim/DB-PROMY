@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>약속 우체국 · 데모 위젯</title>
+    <style>
+      body {
+        margin: 0;
+        background: #103e30;
+        color: #eff4df;
+        font: 14px system-ui;
+        padding: 18px;
+      }
+      a {
+        color: #e4f6a7;
+      }
+      small {
+        display: block;
+        margin-top: 10px;
+        line-height: 1.7;
+      }
+    </style>
+  </head>
+  <body>
+    <strong>약속 우체국</strong>
+    <p id="counts"></p>
+    <a href="./world.html?src=blog" target="_blank" rel="noopener"
+      >동네 입장하기</a
+    ><small
+      >DEMO · 실제 DB손해보험 서비스가 아닙니다<br />이웃 수는 시뮬레이션 ·
+      등불은 이 브라우저 기록</small
+    >
+    <script type="module">
+      import { store, currentClock } from "./src/systems/runtime.js";
+      import { presence } from "./src/systems/presence.js";
+      function update() {
+        document.getElementById("counts").textContent =
+          "내 등불 " +
+          store.state.pending.length +
+          "개 · 시뮬레이션 이웃 " +
+          presence(currentClock()).neighbors +
+          "집";
+      }
+      update();
+      setInterval(update, 60000);
+      store.subscribe(update);
+    </script>
+  </body>
+</html>

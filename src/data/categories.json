@@ -1,0 +1,38 @@
+[
+  {
+    "id": 0,
+    "name": "$text.129",
+    "description": "$text.130",
+    "color": "#ffd99a"
+  },
+  {
+    "id": 1,
+    "name": "$text.131",
+    "description": "$text.132",
+    "color": "#ffc1ac"
+  },
+  {
+    "id": 2,
+    "name": "$text.133",
+    "description": "$text.134",
+    "color": "#b9df91"
+  },
+  {
+    "id": 3,
+    "name": "$text.135",
+    "description": "$text.136",
+    "color": "#a2d7f2"
+  },
+  {
+    "id": 4,
+    "name": "$text.137",
+    "description": "$text.138",
+    "color": "#e3bcf3"
+  },
+  {
+    "id": 5,
+    "name": "$text.139",
+    "description": "$text.140",
+    "color": "#f9eab8"
+  }
+]
