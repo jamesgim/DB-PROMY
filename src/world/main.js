@@ -142,6 +142,7 @@ export async function startWorld() {
     onFinish: () => celebrate("star"),
     onHello: () => celebrate("hello"),
     onExplore: () => {
+      input.view = null;
       input.distance = 32;
       input.yaw += Math.PI / 2;
       toast(copy("text.103"));
@@ -198,6 +199,7 @@ export async function startWorld() {
     } else celebrate("star");
   });
   window.addEventListener("promy:home", () => {
+    input.view = null;
     player.root.position.set(0, 0, 40);
     input.yaw = 0.05;
     input.pitch = 0.55;
@@ -232,8 +234,7 @@ export async function startWorld() {
         copy(e.detail.yearComplete ? "journey.annual" : "journey.hundred"),
         copy("journey.goal")
           .replace("{n}", e.detail.stones)
-          .replace("{t}", e.detail.towers)
-          .replace("{s}", e.detail.stars),
+          .replace("{t}", e.detail.towers),
       );
     }
   });
@@ -321,6 +322,8 @@ export async function startWorld() {
         pointLights: sky.lights.length,
         quality: low ? "low" : "desktop",
         player: [player.root.position.x, player.root.position.z],
+        camera: camera.position.toArray(),
+        view: input.view ?? null,
         homeLit: s.flags.slice(),
         ritual: now < ritualUntil,
         phase: c.phase,
@@ -332,7 +335,7 @@ export async function startWorld() {
         journey: {
           stones: journey.stones,
           slots: journey.slots,
-          stars: journey.stars,
+          visits: store.stars(currentClock()).visits,
           available: journey.available.length,
           mode: journey.mode,
         },

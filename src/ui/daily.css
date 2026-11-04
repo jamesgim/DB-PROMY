@@ -669,3 +669,60 @@
     transition: none !important;
   }
 }
+
+body:has(.modal-back.open) .world-tower-labels,
+body:has(dialog[open]) .world-tower-labels {
+  visibility: hidden !important;
+}
+.daily-panel {
+  overflow-x: hidden;
+}
+.tower-progress > * {
+  min-width: 0;
+}
+.birthday-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.birthday-form label {
+  display: grid;
+  gap: 6px;
+}
+.birthday-form button {
+  grid-column: 1/-1;
+}
+.birthday-form select {
+  width: 100%;
+  padding: 12px;
+}
+.star-message {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  color: #214b3b;
+}
+#starMilestoneCard {
+  padding: 16px;
+  border: 1px solid #a3b79b;
+  border-radius: 16px;
+}
+#starMilestoneCard:empty {
+  display: none;
+}
+#starMilestoneCard button {
+  margin: 6px;
+  max-width: 100%;
+}
+
+#personalStars .constellation-canvas {
+  height: clamp(160px, 25vh, 300px);
+  object-fit: contain;
+  background: #102d3a;
+}
+#personalStars h2 {
+  margin-top: 4px;
+}
+#personalStars .star-message {
+  font-size: 18px;
+  line-height: 1.8;
+}

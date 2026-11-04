@@ -40,9 +40,9 @@ test("existing daily records survive care migration; unknown care prose is dropp
       setItem: (k, v) => values.set(k, v),
     },
   });
-  assert.equal(migrated.state.version, 3);
+  assert.equal(migrated.state.version, 4);
   assert.deepEqual(migrated.state.days, old.days);
-  assert.ok(values.has("promy.world.v3"));
+  assert.ok(values.has("promy.world.v4"));
   assert.equal(JSON.parse(values.get("promy.world.v1")).version, 1);
   assert.deepEqual(migrate(old).days, old.days);
   const clean = migrate({

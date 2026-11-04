@@ -31,7 +31,7 @@ test("one real stone requires a recorded promise and is idempotent per KST day",
   assert.equal(s.act("demoStone", null, clock()), false);
   const next = complete(s, 1);
   s.act("placeStone", null, next);
-  assert.equal(s.journey(next).stars, 2);
+  assert.equal(s.stars(next).visits, 0);
 });
 test("100 stones finish first tower, next starts second, random reward cannot reroll", () => {
   const storage = memory(),
@@ -66,7 +66,7 @@ test("demo 1-key style repetitions reach 300 but do not change real records or p
   assert.equal(demo.act("demoStone", null, clock()), false);
   assert.deepEqual(demo.journey(clock()).slots, [100, 100, 100]);
   assert.equal(demo.journey(clock()).yearComplete, true);
-  assert.equal(demo.journey(clock()).stars, 300);
+  assert.equal(demo.stars(clock()).visits, 0);
   assert.ok(demo.act("drawReward", "tower-1", clock()));
   assert.equal(demo.journey(clock()).draws["tower-1"].goodsId, 1);
   const real = createStore({ storage });

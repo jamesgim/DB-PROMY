@@ -1,6 +1,6 @@
 import * as T from "three";
 import { store, currentClock } from "../systems/runtime.js";
-import { starPosition } from "../systems/journey.js";
+
 import { copy } from "../data/copy.js";
 const CENTERS = [
   [-5, 7],
@@ -74,37 +74,16 @@ export function createJourneyWorld(scene) {
     labels.append(b);
     return b;
   });
-  document.body.append(labels);
-  const positions = new Float32Array(900),
-    edges = [],
-    prefix = [0];
-  for (let i = 0; i < 300; i++) {
-    const p = starPosition(i, store.state.variant);
-    positions.set([(p.x - 0.5) * 24, 8 + (1 - p.y) * 17, -13], i * 3);
-    if (i > 0 && i % 5) {
-      edges.push(
-        ...positions.slice((i - 1) * 3, i * 3),
-        ...positions.slice(i * 3, i * 3 + 3),
-      );
-    }
-    prefix.push(edges.length / 3);
-  }
-  const sg = new T.BufferGeometry().setAttribute(
-    "position",
-    new T.BufferAttribute(positions, 3),
-  );
-  sg.setDrawRange(0, 0);
+  (document.getElementById("app") ?? document.body).append(labels);
+  const sg = new T.BufferGeometry(),
+    lg = new T.BufferGeometry();
+  sg.setAttribute("position", new T.Float32BufferAttribute([], 3));
+  lg.setAttribute("position", new T.Float32BufferAttribute([], 3));
   const stars = new T.Points(
     sg,
     new T.PointsMaterial({ color: 0xffda91, size: 0.18 }),
   );
-  stars.name = "MyPromiseConstellation";
   scene.add(stars);
-  const lg = new T.BufferGeometry().setAttribute(
-    "position",
-    new T.Float32BufferAttribute(edges, 3),
-  );
-  lg.setDrawRange(0, 0);
   scene.add(
     new T.LineSegments(
       lg,
@@ -115,6 +94,7 @@ export function createJourneyWorld(scene) {
       }),
     ),
   );
+  let signId = null;
   let previous = -1,
     dropIndex = -1,
     dropAt = 0;
@@ -130,7 +110,28 @@ export function createJourneyWorld(scene) {
     mesh.instanceMatrix.needsUpdate = true;
   }
   function update(camera, now, view) {
-    const p = store.journey(currentClock());
+    const p = store.journey(currentClock()),
+      sign = store.stars(currentClock()).sign;
+    if ((sign?.id ?? null) !== signId) {
+      signId = sign?.id ?? null;
+      const points =
+        sign?.points.map(([x, y]) => [(x - 0.5) * 24, 8 + (1 - y) * 17, -13]) ??
+        [];
+      sg.setAttribute(
+        "position",
+        new T.Float32BufferAttribute(points.flat(), 3),
+      );
+      lg.setAttribute(
+        "position",
+        new T.Float32BufferAttribute(
+          sign?.links.flatMap(([a, b]) => [...points[a], ...points[b]]) ?? [],
+          3,
+        ),
+      );
+      sg.computeBoundingSphere();
+      lg.computeBoundingSphere();
+    }
+
     if (p.stones !== previous) {
       if (dropIndex >= 0) settle(dropIndex);
       if (p.stones > previous && previous >= 0) {
@@ -138,8 +139,6 @@ export function createJourneyWorld(scene) {
         dropAt = now;
       }
       previous = p.stones;
-      sg.setDrawRange(0, p.stars);
-      lg.setDrawRange(0, prefix[p.stars]);
     }
     p.slots.forEach((n, i) => {
       towers[i].count = n;

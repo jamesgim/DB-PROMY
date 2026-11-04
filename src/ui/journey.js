@@ -6,7 +6,7 @@ import {
   spectate,
 } from "../systems/runtime.js";
 import { copy } from "../data/copy.js";
-import { starPosition } from "../systems/journey.js";
+import { openPersonalStars } from "./personal-stars.js";
 import { openAlbum } from "./care.js";
 import { openShare } from "./share.js";
 export function mountJourney(panel, toast) {
@@ -65,6 +65,22 @@ export function mountJourney(panel, toast) {
   }
   place.onclick = putStone;
   window.addEventListener("keydown", (e) => {
+    if (
+      demonstration &&
+      !spectate &&
+      !e.ctrlKey &&
+      !e.metaKey &&
+      !e.altKey &&
+      ["Digit2", "Numpad2"].includes(e.code) &&
+      !e.target.closest("input,select,textarea") &&
+      !document.querySelector(".modal-back.open") &&
+      !document.querySelector("dialog[open]:not(#personalStars)")
+    ) {
+      e.preventDefault();
+      store.act("demoVisit", null, currentClock());
+      return;
+    }
+
     if (
       demonstration &&
       !e.ctrlKey &&
@@ -154,8 +170,7 @@ export function mountJourney(panel, toast) {
     });
     root.querySelector("#journeyGoal").textContent = copy("journey.goal")
       .replace("{n}", p.stones)
-      .replace("{t}", p.towers)
-      .replace("{s}", p.stars);
+      .replace("{t}", p.towers);
     root.querySelector("#openGifts").textContent = copy(
       "journey.tickets",
     ).replace("{n}", p.available.length);
@@ -194,54 +209,7 @@ function modal(id, title) {
   document.body.append(d);
   return d;
 }
-export function drawConstellation(ctx, w, h, count, variant = 0) {
-  ctx.fillStyle = "#102c41";
-  ctx.fillRect(0, 0, w, h);
-  for (let i = 0; i < count; i++) {
-    const p = starPosition(i, variant),
-      x = p.x * w,
-      y = p.y * h;
-    if (i > 0 && i % 5) {
-      const q = starPosition(i - 1, variant);
-      ctx.strokeStyle = "#dceca960";
-      ctx.beginPath();
-      ctx.moveTo(q.x * w, q.y * h);
-      ctx.lineTo(x, y);
-      ctx.stroke();
-    }
-    ctx.fillStyle = i === count - 1 ? "#fff1bd" : "#ffda91";
-    ctx.beginPath();
-    ctx.arc(x, y, i === count - 1 ? 5 : 2.5, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
-export function openStars() {
-  const p = store.journey(currentClock()),
-    d = modal("personalStars", copy("journey.stars"));
-  const label = document.createElement("p");
-  label.textContent =
-    copy("journey.starCount").replaceAll("{n}", p.stars) +
-    (demonstration ? " · " + copy("journey.demoResult") : "");
-  d.append(label);
-  const c = document.createElement("canvas");
-  c.width = 800;
-  c.height = 500;
-  c.className = "constellation-canvas";
-  drawConstellation(c.getContext("2d"), 800, 500, p.stars, store.state.variant);
-  d.append(c);
-  const note = document.createElement("p");
-  note.textContent = copy(p.stars ? "journey.starCopy" : "journey.starEmpty");
-  d.append(note);
-  const share = document.createElement("button");
-  share.textContent = copy("journey.share");
-  share.onclick = () => {
-    d.close();
-    openShare();
-  };
-  d.append(share);
-  d.showModal();
-  window.dispatchEvent(new Event("promy:stars"));
-}
+export const openStars = openPersonalStars;
 export function openRewards() {
   const d = modal("journeyRewards", copy("journey.gifts")),
     p = store.journey(currentClock());

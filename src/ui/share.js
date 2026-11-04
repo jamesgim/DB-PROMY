@@ -74,7 +74,7 @@ async function makeCard(w, h, avatar) {
     s = store.summary(currentClock()),
     progress = store.journey(currentClock());
   base(ctx, w, h);
-  paintStars(ctx, w, h * 0.65, progress.stars, store.state.variant);
+  paintStars(ctx, w, h * 0.65, 25, store.state.variant);
   text(ctx, copy("text.061"), w / 2, 95, 40);
   text(
     ctx,
@@ -123,8 +123,7 @@ async function makeCard(w, h, avatar) {
     ctx,
     copy("journey.goal")
       .replace("{n}", progress.stones)
-      .replace("{t}", progress.towers)
-      .replace("{s}", progress.stars),
+      .replace("{t}", progress.towers),
     w / 2,
     y + 65,
     44,

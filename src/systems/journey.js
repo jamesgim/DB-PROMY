@@ -75,7 +75,6 @@ export function journeyProgress(state, day, demo = false) {
   return {
     mode: demo ? "demo" : "real",
     stones,
-    stars: stones,
     towers: Math.floor(stones / 100),
     slots: [0, 1, 2].map((i) => Math.max(0, Math.min(100, stones - i * 100))),
     yearComplete: stones === 300,

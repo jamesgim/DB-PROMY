@@ -93,7 +93,7 @@ try {
   await p.getByRole("button", { name: "9:16 저장", exact: true }).click();
   await (await dl).saveAs("test-results/journey-share.png");
   await c.close();
-  console.log("300 stones, stars, persistence and real/demo isolation passed");
+  console.log("300 stones, independent birthday stars, persistence and real/demo isolation passed");
   const mobile = await browser.newContext({
       viewport: { width: 390, height: 844 },
       isMobile: true,
@@ -127,7 +127,7 @@ try {
         prize,
         drawPersisted: true,
         shippingConnected: false,
-        personalStars: 300,
+        personalStarsIndependent: true,
         realDemoIsolated: true,
         mobile: true,
         fallback: true,

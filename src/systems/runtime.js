@@ -16,6 +16,20 @@ export const admin = params.get("admin") === "1";
 export const spectate = params.get("spectate") === "1";
 export const demonstration = admin || params.get("demo") === "1";
 export const store = createStore({ storage, spectate, demonstration });
+if (!demonstration && !spectate) {
+  let session;
+  try {
+    const key = "promy.visit.session";
+    session = sessionStorage.getItem(key);
+    if (!session) {
+      session = crypto.randomUUID().replaceAll("-", "");
+      sessionStorage.setItem(key, session);
+    }
+  } catch {
+    session = crypto.randomUUID().replaceAll("-", "");
+  }
+  store.act("recordVisit", session);
+}
 export const demo = { hour: null, neighbors: null, milestone: 0, ritual: 0 };
 export function currentClock() {
   const c = kst();

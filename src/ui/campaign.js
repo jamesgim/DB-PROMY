@@ -11,6 +11,7 @@ export function mountCampaign({
   let chosen = 0,
     previousFocus;
   const modal = $("modal");
+  document.body.append(modal);
   modal.setAttribute("role", "dialog");
   modal.setAttribute("aria-modal", "true");
   modal.setAttribute("aria-labelledby", "modalTitle");

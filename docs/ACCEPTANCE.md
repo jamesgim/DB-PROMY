@@ -60,3 +60,15 @@ Final software-GPU run: 1,963,088 initial uncompressed response bytes; desktop w
 - External reward/entry/donation operations, service-wide counters, automatic server rendering/posting and source/character publication rights remain outside this local demo. External rewards are not promised or collected.
 
 Keep Issue #1 open pending these checks. The brief's automatic legal-exemption claims were not adopted; production review remains required by `AGENTS.md`.
+
+
+## 후속 수정: 독립 생일 별자리 / 상태 보존
+
+- v4 저장: 월·일만 허용, 12궁 날짜 경계와 2월 29일 처리. 돌탑 수에서 개인 별을 생성하던 결합 제거.
+- 실제 방문은 탭 세션당 1회. 새로고침·모달 왕복은 추가하지 않음. 시연 키2 및 모바일 방문 +1은 별도 저장, 뽑기권 없음.
+- 100회 미만 기념 카드 잠금, 100회 이상 최신 100회 단위 카드와 날짜/잔여일/메시지. PNG 9:16 및 1:1. 기본 로컬 메시지이며 AI 미연결 표시.
+- 생일 입력 즉시 도식은 볼 수 있으며 기념 카드만 100회부터 열림. 정확한 별의 천구 좌표나 점성술 서비스가 아님.
+- legacy 모달을 body로 이동하고 모든 모달이 열리면 월드 레이블 숨김. 카메라 입력·이동 정지, 닫으면 같은 시점 유지. sessionStorage에 시점과 위치 복원.
+- 실제 배송 및 MP3는 미연결. 사용자 배송 시스템 없음 확인을 유지함.
+
+검증: 단위 테스트 22개 통과. 기존 300돌 브라우저 QA 통과(모바일·2D 포함). birthday-qa 및 birthday-view-qa 통과: 실제 키2 100/200회, 무보상, 생일 변경/복원, 카드 PNG, 모달 레이어, 선물 보관, 새로고침 방문 중복 방지, 모달 내 카메라 정지/재접속 시점 복원, 모바일 2월 29일 및 방문 버튼. 브라우저 오류 0건.

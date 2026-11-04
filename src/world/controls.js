@@ -1,5 +1,5 @@
 import * as T from "three";
-import { spectate } from "../systems/runtime.js";
+import { spectate, demonstration } from "../systems/runtime.js";
 export function controls(
   renderer,
   player,
@@ -15,6 +15,46 @@ export function controls(
     near: null,
     moving: false,
   };
+  const viewKey = "promy.view." + (demonstration ? "demo" : "real");
+  try {
+    const v = JSON.parse(sessionStorage.getItem(viewKey));
+    if (
+      v &&
+      Array.isArray(v.position) &&
+      v.position.length === 3 &&
+      v.position.every(Number.isFinite) &&
+      [v.yaw, v.pitch, v.distance, v.rotation].every(Number.isFinite)
+    ) {
+      player.position.fromArray(v.position);
+      player.rotation.y = v.rotation;
+      input.yaw = v.yaw;
+      input.pitch = T.MathUtils.clamp(v.pitch, 0.23, 1.23);
+      input.distance = T.MathUtils.clamp(v.distance, 7, 60);
+      input.view = ["towers", "stars"].includes(v.view) ? v.view : null;
+      if (Array.isArray(v.camera) && v.camera.length === 3)
+        camera.position.fromArray(v.camera);
+      document.querySelector(".daily-panel").scrollTop = v.scroll || 0;
+    }
+  } catch {}
+  const saveView = () => {
+    try {
+      sessionStorage.setItem(
+        viewKey,
+        JSON.stringify({
+          position: player.position.toArray(),
+          rotation: player.rotation.y,
+          yaw: input.yaw,
+          pitch: input.pitch,
+          distance: input.distance,
+          view: input.view,
+          camera: camera.position.toArray(),
+          scroll: document.querySelector(".daily-panel")?.scrollTop || 0,
+        }),
+      );
+    } catch {}
+  };
+  setInterval(saveView, 1000);
+  window.addEventListener("pagehide", saveView);
   const clamp = T.MathUtils.clamp;
   function interact() {
     if (!spectate && !modalOpen()) {
@@ -102,6 +142,15 @@ export function controls(
     document.getElementById(id).onclick = () =>
       (input.distance = clamp(input.distance + delta, 7, 60));
   input.update = (dt) => {
+    if (modalOpen()) {
+      input.moving = false;
+      input.keys = {};
+      stop();
+      input.near = null;
+      document.getElementById("nearPrompt").classList.remove("show");
+      return;
+    }
+
     const k = input.keys;
     let x =
         (k.KeyD || k.ArrowRight ? 1 : 0) -

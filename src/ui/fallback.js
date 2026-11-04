@@ -118,7 +118,7 @@ function draw() {
   ctx.fillText("PC", 225, 370);
   ctx.fillText(copy("text.056"), 102, 370);
   const journey = store.journey(c);
-  paintStars(ctx, 540, 160, journey.stars, store.state.variant);
+  paintStars(ctx, 540, 160, 25, store.state.variant);
   paintTowers(ctx, 12, 65, 480, 180, journey.slots);
   document.getElementById("fallbackStats").textContent =
     copy("text.057") +
