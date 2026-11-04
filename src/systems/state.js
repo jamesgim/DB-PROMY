@@ -159,6 +159,16 @@ export function createStore({
   function act(type, payload, clock = kst(now())) {
     if (spectate) return false;
     const day = clock.day;
+    if (["addSkyBirthday", "resetSkyBirthdays"].includes(type)) {
+      if (!demonstration) return false;
+      state.personalStars.skyCount =
+        type === "resetSkyBirthdays"
+          ? 0
+          : Math.min(365, state.personalStars.skyCount + 1);
+      save();
+      emit();
+      return true;
+    }
     if (["setBirthday", "recordVisit", "demoVisit"].includes(type)) {
       if (type === "setBirthday") {
         if (!validBirthday(payload)) return false;
@@ -184,7 +194,12 @@ export function createStore({
           branch.sessions = [...branch.sessions, payload].slice(-512);
         }
         branch.count++;
-        if (branch.count % 100 === 0) branch.milestones[branch.count] = day;
+        if (branch.count > 365) {
+          branch.count = 0;
+          branch.milestones = {};
+        }
+        if (branch.count > 0 && branch.count % 100 === 0)
+          branch.milestones[branch.count] = day;
       }
       save();
       emit();

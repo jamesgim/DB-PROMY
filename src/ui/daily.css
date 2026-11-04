@@ -464,7 +464,7 @@
   inset: 0;
   z-index: 7;
 }
-.world-tower-labels span {
+.world-tower-labels > span {
   position: absolute;
   transform: translate(-50%, -50%);
   background: #103e30dc;
@@ -562,7 +562,7 @@
   .goods-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  .world-tower-labels span {
+  .world-tower-labels > span {
     font-size: 10px;
     padding: 5px;
   }
@@ -725,4 +725,68 @@ body:has(dialog[open]) .world-tower-labels {
 #personalStars .star-message {
   font-size: 18px;
   line-height: 1.8;
+}
+
+.tower-seal {
+  display: none !important;
+}
+.world-tower-labels .sealed {
+  background: transparent;
+  border: 0;
+}
+.sealed .tower-counter {
+  display: none;
+}
+.sealed .tower-seal {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  color: #f6f8d9;
+  text-shadow: 0 2px 4px #102d20;
+}
+.tower-seal img {
+  width: 36px;
+  height: 42px;
+  object-fit: contain;
+}
+.tower-seal b {
+  background: #174c3b;
+  border-radius: 12px;
+  padding: 2px 12px;
+}
+.sky-toolbar {
+  position: fixed;
+  z-index: 27;
+  left: 50%;
+  top: 88px;
+  transform: translateX(-50%);
+  text-align: center;
+  color: #eff8da;
+  background: #102d3ae8;
+  padding: 12px;
+  border-radius: 16px;
+}
+.sky-toolbar[hidden] {
+  display: none;
+}
+.viewing-sky .hero-copy,
+.viewing-sky .world-tower-labels {
+  visibility: hidden;
+}
+#journeyMode,
+#starVisitMode:empty {
+  display: none;
+}
+
+.viewing-sky .daily-panel {
+  visibility: hidden;
+}
+.sky-toolbar button {
+  background: #d9edb2;
+  color: #153c32;
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font: inherit;
+  cursor: pointer;
 }

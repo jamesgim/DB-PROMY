@@ -55,7 +55,8 @@ try {
   await m.selectOption("#birthDay", "29");
   await m.locator("#applyBirthday").click();
   assert.match(await m.locator("#zodiacName").innerText(), /물고기/);
-  await m.locator("#addStarVisit").click();
+  await m.locator("#zodiacName").click();
+  await m.keyboard.press("2");
   assert.match(await m.locator("#starVisitCount").innerText(), /1/);
   assert.equal(
     await m

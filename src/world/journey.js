@@ -1,6 +1,7 @@
 import * as T from "three";
 import { store, currentClock } from "../systems/runtime.js";
 
+import { constellationLines, skyBirthdays } from "../systems/stars.js";
 import { copy } from "../data/copy.js";
 const CENTERS = [
   [-5, 7],
@@ -71,6 +72,9 @@ export function createJourneyWorld(scene) {
   labels.className = "world-tower-labels";
   const badges = CENTERS.map(() => {
     const b = document.createElement("span");
+    b.innerHTML =
+      '<span class="tower-counter"></span><span class="tower-seal"><img src="./assets/promy-seal.png" alt=""><b></b></span>';
+    b.querySelector(".tower-seal b").textContent = copy("tower.promise");
     labels.append(b);
     return b;
   });
@@ -94,7 +98,73 @@ export function createJourneyWorld(scene) {
       }),
     ),
   );
-  let signId = null;
+  const cg = new T.BufferGeometry(),
+    clg = new T.BufferGeometry();
+  cg.setAttribute("position", new T.Float32BufferAttribute([], 3));
+  clg.setAttribute("position", new T.Float32BufferAttribute([], 3));
+  scene.add(
+    new T.Points(cg, new T.PointsMaterial({ color: 0xb5dcd9, size: 0.1 })),
+    new T.LineSegments(
+      clg,
+      new T.LineBasicMaterial({
+        color: 0x79b6be,
+        transparent: true,
+        opacity: 0.55,
+      }),
+    ),
+  );
+  let dirty = true,
+    cachedDay = "",
+    cachedProgress,
+    personal,
+    skyCount = -1;
+  store.subscribe(() => (dirty = true));
+  function fill(geometry, points) {
+    geometry.setAttribute("position", new T.Float32BufferAttribute(points, 3));
+    if (points.length) geometry.computeBoundingSphere();
+  }
+  function refresh() {
+    const c = currentClock();
+    if (c.day !== cachedDay) {
+      dirty = true;
+      cachedDay = c.day;
+    }
+    if (!dirty) return;
+    dirty = false;
+    cachedProgress = store.journey(c);
+    personal = store.stars(c);
+    const reveal = constellationLines(personal.sign, personal.visits),
+      map = ([x, y]) => [(x - 0.5) * 14, 19 + (1 - y) * 12, -24];
+    fill(sg, reveal.points.flatMap(map));
+    fill(
+      lg,
+      reveal.edges.flatMap((edge) => edge.flatMap(map)),
+    );
+    const count = store.state.personalStars.skyCount;
+    if (count !== skyCount) {
+      skyCount = count;
+      const dots = [],
+        edges = [];
+      skyBirthdays(count).forEach(({ sign }, i) => {
+        const angle = i * 2.399963,
+          r = 14 + Math.sqrt(i / 365) * 29,
+          cx = Math.cos(angle) * r,
+          cy = 25 + Math.sin(angle) * r * 0.55,
+          map = ([x, y]) => [cx + (x - 0.5) * 2.7, cy + (1 - y) * 2.2, -27];
+        dots.push(...sign.points.flatMap(map));
+        edges.push(
+          ...sign.links.flatMap(([a, b]) => [
+            ...map(sign.points[a]),
+            ...map(sign.points[b]),
+          ]),
+        );
+      });
+      fill(cg, dots);
+      fill(clg, edges);
+    }
+  }
+  const projected = new T.Vector3();
+  let labelAt = 0;
   let previous = -1,
     dropIndex = -1,
     dropAt = 0;
@@ -110,28 +180,8 @@ export function createJourneyWorld(scene) {
     mesh.instanceMatrix.needsUpdate = true;
   }
   function update(camera, now, view) {
-    const p = store.journey(currentClock()),
-      sign = store.stars(currentClock()).sign;
-    if ((sign?.id ?? null) !== signId) {
-      signId = sign?.id ?? null;
-      const points =
-        sign?.points.map(([x, y]) => [(x - 0.5) * 24, 8 + (1 - y) * 17, -13]) ??
-        [];
-      sg.setAttribute(
-        "position",
-        new T.Float32BufferAttribute(points.flat(), 3),
-      );
-      lg.setAttribute(
-        "position",
-        new T.Float32BufferAttribute(
-          sign?.links.flatMap(([a, b]) => [...points[a], ...points[b]]) ?? [],
-          3,
-        ),
-      );
-      sg.computeBoundingSphere();
-      lg.computeBoundingSphere();
-    }
-
+    refresh();
+    const p = cachedProgress;
     if (p.stones !== previous) {
       if (dropIndex >= 0) settle(dropIndex);
       if (p.stones > previous && previous >= 0) {
@@ -142,21 +192,28 @@ export function createJourneyWorld(scene) {
     }
     p.slots.forEach((n, i) => {
       towers[i].count = n;
-      const height = 0.34 + Math.floor(Math.max(0, n - 1) / 5) * 0.255;
-      const screen = new T.Vector3(
-        CENTERS[i][0],
-        height + 1.2,
-        CENTERS[i][1],
-      ).project(camera);
-      badges[i].style.display =
-        view === "stars" || screen.z > 1 || Math.abs(screen.x) > 1
-          ? "none"
-          : "block";
-      badges[i].style.left = (screen.x * 0.5 + 0.5) * innerWidth + "px";
-      badges[i].style.top = (-screen.y * 0.5 + 0.5) * innerHeight + "px";
-      badges[i].textContent =
-        copy("journey.tower").replace("{n}", i + 1) + " · " + n + "/100";
+      towers[i].scale.setScalar(n === 100 ? 0.4 : 1);
     });
+    if (now - labelAt > 100) {
+      labelAt = now;
+      p.slots.forEach((n, i) => {
+        const height =
+          (0.34 + Math.floor(Math.max(0, n - 1) / 5) * 0.255) *
+          (n === 100 ? 0.4 : 1);
+        const screen = projected
+          .set(CENTERS[i][0], height + 0.65, CENTERS[i][1])
+          .project(camera);
+        badges[i].style.display =
+          view === "stars" || screen.z > 1 || Math.abs(screen.x) > 1
+            ? "none"
+            : "block";
+        badges[i].style.left = (screen.x * 0.5 + 0.5) * innerWidth + "px";
+        badges[i].style.top = (-screen.y * 0.5 + 0.5) * innerHeight + "px";
+        badges[i].classList.toggle("sealed", n === 100);
+        badges[i].querySelector(".tower-counter").textContent =
+          copy("journey.tower").replace("{n}", i + 1) + " · " + n + "/100";
+      });
+    }
     if (dropIndex >= 0) {
       const tower = Math.floor(dropIndex / 100),
         index = dropIndex % 100,
@@ -172,5 +229,15 @@ export function createJourneyWorld(scene) {
     }
     return p;
   }
-  return { update, towers, stars };
+  return {
+    update,
+    towers,
+    stars,
+    skyStats: () => ({
+      neighbors: skyCount,
+      personalPoints: sg.attributes.position.count,
+      personalEdges: lg.attributes.position.count / 2,
+      towerHeights: towers.map((m) => (m.count === 100 ? 2.142 : 0)),
+    }),
+  };
 }

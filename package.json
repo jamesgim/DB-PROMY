@@ -8,7 +8,9 @@
     "assets": "node scripts/build-assets.js",
     "offline": "node scripts/build-offline.js",
     "vendor": "node scripts/vendor.js",
-    "qa": "node scripts/journey-qa.js"
+    "qa": "node scripts/sky-performance-qa.js",
+    "qa:towers": "node scripts/journey-qa.js",
+    "qa:music": "node scripts/reset-music-qa.js"
   },
   "devDependencies": {
     "@gltf-transform/core": "4.2.1",

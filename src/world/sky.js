@@ -1,7 +1,7 @@
 import * as T from "three";
 export function createSky(scene, low) {
   const geometry = new T.BufferGeometry(),
-    points = new Float32Array((low ? 25000 : 100000) * 3);
+    points = new Float32Array((low ? 1500 : 4000) * 3);
   for (let i = 0; i < points.length / 3; i++) {
     const a = i * 2.399963,
       r = 65 + (i % 19) * 2,
@@ -36,7 +36,7 @@ export function createSky(scene, low) {
   sun.shadow.bias = -0.001;
   scene.add(hemi, sun);
   const lights = [];
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < (low ? 4 : 8); i++) {
     const a = (i * Math.PI * 2) / 8;
     const l = new T.PointLight(0xffd493, 0, 8, 2);
     l.position.set(Math.cos(a) * 6, 2, Math.sin(a) * 6);
@@ -48,7 +48,10 @@ export function createSky(scene, low) {
     sun,
     lights,
     update(c, s, dt, ritual) {
-      const night = c.hour >= 18 || c.hour < 6,
+      const night =
+          c.hour >= 18 ||
+          c.hour < 6 ||
+          document.body.classList.contains("viewing-sky"),
         target = night ? 1 : 0;
       blend = T.MathUtils.damp(blend, target, 2, dt);
       const color = new T.Color(0x88bcb4).lerp(

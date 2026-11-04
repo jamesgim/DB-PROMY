@@ -30,7 +30,7 @@ try {
   await p.reload();
   await p.waitForFunction(() => window.__PROMY_QA__?.journey.stones === 1);
   console.log("Real promise, single daily stone and reload passed");
-  await p.locator("#switchJourneyMode").click();
+  await p.goto("http://127.0.0.1:4173/world.html?demo=1&qa=1");
   await p.waitForFunction(() => window.__PROMY_QA__?.journey.mode === "demo");
   assert.equal(await p.locator("#dailyTotal").textContent(), "0");
   await p.locator("#viewTowers").click();
@@ -84,7 +84,7 @@ try {
   await p.locator("#openStars").click();
   await p.screenshot({ path: "test-results/journey-stars.png" });
   await p.locator("#personalStars [data-close]").click();
-  await p.locator("#switchJourneyMode").click();
+  await p.goto("http://127.0.0.1:4173/world.html?qa=1");
   await p.waitForFunction(() => window.__PROMY_QA__?.journey.mode === "real");
   assert.equal(await p.locator("#dailyTotal").textContent(), "1");
   await p.locator("#shareDaily").click();
@@ -93,7 +93,9 @@ try {
   await p.getByRole("button", { name: "9:16 저장", exact: true }).click();
   await (await dl).saveAs("test-results/journey-share.png");
   await c.close();
-  console.log("300 stones, independent birthday stars, persistence and real/demo isolation passed");
+  console.log(
+    "300 stones, independent birthday stars, persistence and real/demo isolation passed",
+  );
   const mobile = await browser.newContext({
       viewport: { width: 390, height: 844 },
       isMobile: true,

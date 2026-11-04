@@ -1,3 +1,4 @@
+import { openSkyCanvas } from "./sky-canvas.js";
 import { copy } from "../data/copy.js";
 import { mountDaily, toast } from "./daily.js";
 import {
@@ -141,3 +142,5 @@ mountDaily({
 store.subscribe(draw);
 setInterval(draw, 1000);
 draw();
+
+window.addEventListener("promy:stars", openSkyCanvas);

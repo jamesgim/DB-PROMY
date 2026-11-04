@@ -85,6 +85,24 @@ export function mountJourney(panel, toast) {
       !e.metaKey &&
       !e.altKey &&
       !e.repeat &&
+      !e.target.closest("input,select,textarea") &&
+      ["Digit8", "Numpad8", "Digit7", "Numpad7"].includes(e.code)
+    ) {
+      e.preventDefault();
+      store.act(
+        e.code.endsWith("8") ? "addSkyBirthday" : "resetSkyBirthdays",
+        null,
+        currentClock(),
+      );
+      return;
+    }
+    if (
+      demonstration &&
+      !spectate &&
+      !e.ctrlKey &&
+      !e.metaKey &&
+      !e.altKey &&
+      !e.repeat &&
       !e.target.closest("input,select,textarea")
     ) {
       if (["Digit0", "Numpad0", "Digit9", "Numpad9"].includes(e.code)) {
@@ -128,40 +146,21 @@ export function mountJourney(panel, toast) {
   root.querySelector("#openStars").onclick = openStars;
   root.querySelector("#openGifts").onclick = openRewards;
   root.querySelector("#openAlbum").onclick = openAlbum;
-  const link = root.querySelector("#switchJourneyMode"),
-    url = new URL(location.href);
-  if (demonstration) {
-    url.searchParams.delete("demo");
-    url.searchParams.delete("admin");
-  } else url.searchParams.set("demo", "1");
-  link.href = url.href;
-  link.textContent = copy(
-    demonstration ? "journey.endDemo" : "journey.startDemo",
-  );
-  if (demonstration && !spectate) {
-    const reset = document.createElement("button");
-    reset.id = "resetJourneyDemo";
-    reset.textContent = copy("journey.resetDemo");
-    reset.onclick = () => store.act("resetDemo", null, currentClock());
-    const towers = document.createElement("button");
-    towers.id = "resetTowerDemo";
-    towers.textContent = copy("journey.resetTowers");
-    towers.onclick = () => resetPart("resetDemoTowers");
-    const stars = document.createElement("button");
-    stars.id = "resetStarDemo";
-    stars.textContent = copy("stars.reset");
-    stars.onclick = () => resetPart("resetDemoStars");
-    root.append(towers, stars, reset);
-  }
+  root.querySelector("#switchJourneyMode")?.remove();
+  const sky = document.createElement("button");
+  sky.id = "viewSky";
+  sky.textContent = copy("sky.view");
+  sky.onclick = () => {
+    window.dispatchEvent(new Event("promy:stars"));
+  };
+  root.querySelector(".journey-nav").append(sky);
   function update() {
     const s = store.summary(currentClock()),
       p = store.journey(currentClock());
     const selected = data.care.find((m) => m.id === p.selected);
     panel.classList.toggle("care-complete", p.confirmed && !demonstration);
     panel.classList.toggle("demo-journey", demonstration);
-    root.querySelector("#journeyMode").textContent = copy(
-      demonstration ? "journey.demo" : "journey.real",
-    );
+    root.querySelector("#journeyMode").textContent = copy("journey.welcome");
     root.querySelector("#careInstruction").textContent = selected
       ? selected.action
       : copy("journey.choose");
@@ -176,9 +175,7 @@ export function mountJourney(panel, toast) {
         ? "journey.full"
         : p.placedToday && !demonstration
           ? "journey.placed"
-          : demonstration
-            ? "journey.demoPlace"
-            : "journey.place",
+          : "journey.place",
     );
     root.querySelector("#journeyHint").textContent = copy(
       p.yearComplete
@@ -227,7 +224,13 @@ export function mountJourney(panel, toast) {
     }
   }
   store.subscribe(update);
-  setInterval(update, 1000);
+  let lastDay = currentClock().day;
+  setInterval(() => {
+    if (currentClock().day !== lastDay) {
+      lastDay = currentClock().day;
+      update();
+    }
+  }, 30000);
   update();
 }
 function modal(id, title) {

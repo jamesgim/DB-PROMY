@@ -165,8 +165,8 @@ export function controls(
     if (input.moving) input.view = null;
     if (input.view === "towers" || input.view === "stars") {
       const stars = input.view === "stars",
-        dest = stars ? new T.Vector3(0, 12, 21) : new T.Vector3(12, 10, 23),
-        target = stars ? new T.Vector3(0, 17, -13) : new T.Vector3(0, 2.5, 6);
+        dest = stars ? new T.Vector3(0, 23, 53) : new T.Vector3(12, 10, 23),
+        target = stars ? new T.Vector3(0, 25, -25) : new T.Vector3(0, 2.5, 6);
       camera.position.lerp(dest, 1 - Math.exp(-4 * dt));
       camera.lookAt(target);
       document.getElementById("nearPrompt").classList.remove("show");

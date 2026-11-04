@@ -8,23 +8,21 @@ import { store, currentClock, demo, spectate } from "../systems/runtime.js";
 import { mountCampaign } from "../ui/campaign.js";
 import { toast } from "../ui/daily.js";
 import { setCapture, setVideoSource } from "../ui/share.js";
-import { postprocessing } from "./post.js";
 import { createJourneyWorld } from "./journey.js";
 export async function startWorld() {
   const $ = (id) => document.getElementById(id),
     params = new URLSearchParams(location.search);
-  let low =
-    params.get("quality") === "low" ||
-    matchMedia("(max-width:900px)").matches ||
-    (navigator.hardwareConcurrency ?? 8) <= 4;
+  let low = params.get("quality") !== "high";
   const renderer = new T.WebGLRenderer({
     antialias: !low,
     alpha: true,
-    powerPreference: low ? "low-power" : "high-performance",
+    powerPreference: "low-power",
     preserveDrawingBuffer: false,
   });
   renderer.setSize(innerWidth, innerHeight);
-  renderer.setPixelRatio(Math.min(devicePixelRatio, low ? 1 : 1.5));
+  renderer.setPixelRatio(
+    Math.min(devicePixelRatio, low ? Math.min(1, 1600 / innerWidth) : 1.5),
+  );
   renderer.shadowMap.enabled = !low;
   renderer.shadowMap.type = T.PCFSoftShadowMap;
   renderer.toneMapping = T.ACESFilmicToneMapping;
@@ -42,7 +40,9 @@ export async function startWorld() {
     220,
   );
   camera.position.set(10, 15, 20);
-  const composer = low ? null : postprocessing(renderer, scene, camera);
+  const composer = low
+    ? null
+    : (await import("./post.js")).postprocessing(renderer, scene, camera);
   renderer.info.autoReset = false;
   const assets = await loadAssets(
     (p) =>
@@ -220,9 +220,34 @@ export async function startWorld() {
   window.addEventListener("promy:towers", () => {
     input.view = "towers";
   });
+  const skyBar = document.createElement("div");
+  skyBar.className = "sky-toolbar";
+  skyBar.hidden = true;
+  const caption = document.createElement("p");
+  caption.textContent = copy("sky.info");
+  const back = document.createElement("button");
+  back.textContent = copy("sky.back");
+  skyBar.append(caption, back);
+  document.body.append(skyBar);
+  let beforeSky = null;
   window.addEventListener("promy:stars", () => {
+    if (input.view !== "stars")
+      beforeSky = {
+        view: input.view,
+        camera: camera.position.clone(),
+        quaternion: camera.quaternion.clone(),
+      };
     input.view = "stars";
+    skyBar.hidden = false;
   });
+  back.onclick = () => {
+    if (beforeSky) {
+      input.view = beforeSky.view;
+      camera.position.copy(beforeSky.camera);
+      camera.quaternion.copy(beforeSky.quaternion);
+    } else input.view = null;
+    skyBar.hidden = true;
+  };
   window.addEventListener("promy:stone", (e) => {
     player.play("cheer", true);
     cheerUntil = performance.now() + 1200;
@@ -252,12 +277,39 @@ export async function startWorld() {
     elapsed = 0,
     performanceChecked = false,
     raf;
+  let zoneAt = 0,
+    cachedSummary,
+    summaryDirty = true;
+  store.subscribe(() => (summaryDirty = true));
+  const measuredPlayerHeight = new T.Box3()
+    .setFromObject(player.root)
+    .getSize(new T.Vector3()).y;
+  let renderedAt = 0;
   function frame(now) {
+    if (document.hidden) return;
     raf = requestAnimationFrame(frame);
-    const dt = Math.min(0.05, (now - last) / 1000);
+    const modal =
+      $("modal").classList.contains("open") ||
+      !!document.querySelector("dialog[open]");
+    const active =
+      input.moving ||
+      Object.values(input.keys).some(Boolean) ||
+      now < cheerUntil ||
+      now < ritualUntil;
+    const limit = modal ? 2 : active ? 30 : 15;
+    if (now - renderedAt < 1000 / limit) return;
+    renderedAt = now;
+    skyBar.hidden = input.view !== "stars";
+    document.body.classList.toggle("viewing-sky", input.view === "stars");
+    const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
-    const c = currentClock(),
-      s = zones.update(c, demo.milestone);
+    const c = currentClock();
+    if (summaryDirty || now - zoneAt > 1000) {
+      cachedSummary = zones.update(c, demo.milestone);
+      zoneAt = now;
+      summaryDirty = false;
+    }
+    const s = cachedSummary;
     input.update(dt);
     const journey = journeyWorld.update(camera, now, input.view);
     if (cheerUntil < now) player.play(input.moving ? "walk" : "idle");
@@ -304,7 +356,7 @@ export async function startWorld() {
     if (!performanceChecked && now - started > 3500) {
       performanceChecked = true;
       const fps = frames / Math.max(1, elapsed);
-      if (fps < 30 && !low) {
+      if (fps < 12 && !low) {
         low = true;
         renderer.shadowMap.enabled = false;
         renderer.setPixelRatio(1);
@@ -320,6 +372,9 @@ export async function startWorld() {
         points: renderer.info.render.points,
         pointLights: sky.lights.length,
         quality: low ? "low" : "desktop",
+        renderLimit: limit,
+        renderedFrames: frames,
+        sky: journeyWorld.skyStats(),
         player: [player.root.position.x, player.root.position.z],
         camera: camera.position.toArray(),
         view: input.view ?? null,
@@ -327,9 +382,7 @@ export async function startWorld() {
         ritual: now < ritualUntil,
         phase: c.phase,
         models: ["player", "promy"],
-        playerHeight: new T.Box3()
-          .setFromObject(player.root)
-          .getSize(new T.Vector3()).y,
+        playerHeight: measuredPlayerHeight,
         hasCampfire: !!scene.getObjectByName("Campfire"),
         journey: {
           stones: journey.stones,
@@ -403,6 +456,12 @@ export async function startWorld() {
     location.replace("./fallback.html" + location.search);
   });
   $("loading").style.display = "none";
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      last = performance.now();
+      raf = requestAnimationFrame(frame);
+    } else cancelAnimationFrame(raf);
+  });
   requestAnimationFrame(frame);
   return { ritual };
 }

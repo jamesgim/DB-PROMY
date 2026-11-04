@@ -6,10 +6,10 @@ import {
   spectate,
 } from "../systems/runtime.js";
 import { copy } from "../data/copy.js";
-import { validBirthday } from "../systems/stars.js";
+import { validBirthday, constellationLines } from "../systems/stars.js";
 import { composeStarMessage, starMessage } from "../systems/star-message.js";
 import { download } from "./share.js";
-export function paintZodiac(ctx, w, h, sign) {
+export function paintZodiac(ctx, w, h, sign, visits = 100) {
   const bg = ctx.createLinearGradient(0, 0, w, h);
   bg.addColorStop(0, "#173e48");
   bg.addColorStop(1, "#091b35");
@@ -30,13 +30,14 @@ export function paintZodiac(ctx, w, h, sign) {
   if (!sign) return;
   ctx.strokeStyle = "#ffe4a5aa";
   ctx.lineWidth = Math.max(1.5, w / 500);
-  for (const [a, b] of sign.links) {
+  const reveal = constellationLines(sign, visits);
+  for (const [a, b] of reveal.edges) {
     ctx.beginPath();
-    ctx.moveTo(sign.points[a][0] * w, sign.points[a][1] * h);
-    ctx.lineTo(sign.points[b][0] * w, sign.points[b][1] * h);
+    ctx.moveTo(a[0] * w, a[1] * h);
+    ctx.lineTo(b[0] * w, b[1] * h);
     ctx.stroke();
   }
-  for (const [x, y] of sign.points) {
+  for (const [x, y] of reveal.points) {
     ctx.fillStyle = "#fff2bd";
     ctx.shadowColor = "#ffda91";
     ctx.shadowBlur = 12;
@@ -199,17 +200,6 @@ export function openPersonalStars() {
       currentClock(),
     );
   validate();
-  if (demonstration && !spectate) {
-    const add = document.createElement("button");
-    add.id = "addStarVisit";
-    add.textContent = copy("stars.demoAdd");
-    add.onclick = () => store.act("demoVisit", null, currentClock());
-    const reset = document.createElement("button");
-    reset.id = "resetPersonalStars";
-    reset.textContent = copy("stars.reset");
-    reset.onclick = () => store.act("resetDemoStars", null, currentClock());
-    d.querySelector("#starVisitAction").append(add, reset);
-  }
   let cardKey = "",
     abort = null;
   function render() {
@@ -217,13 +207,19 @@ export function openPersonalStars() {
     d.querySelector("#starVisitCount").textContent = copy(
       "stars.visits",
     ).replace("{n}", p.visits);
-    d.querySelector("#starVisitMode").textContent = copy(
-      demonstration ? "stars.demo" : "stars.real",
-    );
+    d.querySelector("#starVisitMode").textContent = copy("stars.cycle");
     d.querySelector("#zodiacName").textContent = p.sign
-      ? p.sign.name + " · " + copy("stars.preview")
+      ? p.sign.name +
+        " · " +
+        copy(p.unlocked ? "stars.completed" : "stars.growing")
       : copy("stars.empty");
-    paintZodiac(d.querySelector("canvas").getContext("2d"), 800, 430, p.sign);
+    paintZodiac(
+      d.querySelector("canvas").getContext("2d"),
+      800,
+      430,
+      p.sign,
+      p.visits,
+    );
     d.querySelector("#starUnlockStatus").textContent = !p.unlocked
       ? copy("stars.locked").replace("{n}", 100 - p.visits)
       : !p.sign

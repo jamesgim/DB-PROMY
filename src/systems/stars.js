@@ -329,17 +329,22 @@ export function freshStars() {
     birthday: null,
     real: { count: 0, sessions: [], milestones: {} },
     demo: { count: 0, milestones: {} },
+    skyCount: 0,
   };
 }
 export function cleanStars(raw) {
   const out = freshStars();
+  out.skyCount = Math.max(
+    0,
+    Math.min(365, Math.floor(Number(raw?.skyCount) || 0)),
+  );
   if (validBirthday(raw?.birthday))
     out.birthday = { month: raw.birthday.month, day: raw.birthday.day };
   for (const mode of ["real", "demo"]) {
     const branch = raw?.[mode];
     out[mode].count =
       Number.isInteger(branch?.count) && branch.count >= 0
-        ? Math.min(100000, branch.count)
+        ? branch.count % 366
         : 0;
     for (const [n, d] of Object.entries(branch?.milestones ?? {}))
       if (
@@ -373,5 +378,35 @@ export function starProgress(state, day, demo = false) {
     cardDay,
     remaining: daysRemaining(cardDay),
     unlocked: branch.count >= 100,
+    fraction: Math.min(1, branch.count / 100),
   };
+}
+
+// Reveal an incomplete final edge until the hundredth visit. No full outline at 99.
+export function constellationLines(sign, visits = 100) {
+  if (!sign || visits <= 0) return { points: [], edges: [] };
+  const fraction = Math.min(1, Math.max(0, visits / 100)),
+    amount = sign.links.length * fraction,
+    edges = [],
+    ids = new Set();
+  for (let i = 0; i < Math.ceil(amount); i++) {
+    const [a, b] = sign.links[i],
+      t = Math.min(1, amount - i),
+      start = sign.points[a],
+      end = sign.points[b];
+    edges.push([
+      start,
+      [start[0] + (end[0] - start[0]) * t, start[1] + (end[1] - start[1]) * t],
+    ]);
+    ids.add(a);
+    if (t === 1) ids.add(b);
+  }
+  return { points: [...ids].map((i) => sign.points[i]), edges };
+}
+export function skyBirthdays(count) {
+  return Array.from({ length: Math.max(0, Math.min(365, count)) }, (_, i) => {
+    const d = new Date(Date.UTC(2027, 0, i + 1)),
+      birthday = { month: d.getUTCMonth() + 1, day: d.getUTCDate() };
+    return { ...birthday, sign: zodiacFor(birthday) };
+  });
 }

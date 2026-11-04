@@ -63,3 +63,43 @@ test("real sessions deduplicate refresh, persist and are isolated from demo; spe
   delete old.personalStars;
   assert.equal(migrate(old).personalStars.real.count, 0);
 });
+
+test("constellation fills at 100 only; visit 366 resets the cycle without birthday loss", async () => {
+  const { constellationLines, skyBirthdays } = await import(
+    "../src/systems/stars.js"
+  );
+  const sign = zodiacFor({ month: 9, day: 10 });
+  assert.deepEqual(constellationLines(sign, 0), { points: [], edges: [] });
+  const almost = constellationLines(sign, 99),
+    full = constellationLines(sign, 100);
+  assert.notDeepEqual(almost.edges, full.edges);
+  assert.equal(full.edges.length, sign.links.length);
+  const s = createStore({ storage: memory(), demonstration: true });
+  s.act("setBirthday", { month: 9, day: 10 }, c);
+  for (let i = 0; i < 365; i++) s.act("demoVisit", null, c);
+  assert.equal(s.stars(c).visits, 365);
+  s.act("demoVisit", null, c);
+  assert.equal(s.stars(c).visits, 0);
+  assert.equal(s.stars(c).unlocked, false);
+  assert.equal(s.stars(c).fraction, 0);
+  assert.deepEqual(s.state.personalStars.demo.milestones, {});
+  assert.equal(s.stars(c).birthday.day, 10);
+  for (let i = 0; i < 366; i++) s.act("addSkyBirthday", null, c);
+  assert.equal(s.state.personalStars.skyCount, 365);
+  const days = skyBirthdays(365);
+  assert.deepEqual([days[0].month, days[0].day], [1, 1]);
+  assert.deepEqual([days.at(-1).month, days.at(-1).day], [12, 31]);
+  assert.equal(new Set(days.map((d) => d.sign.id)).size, 12);
+  s.act("resetSkyBirthdays", null, c);
+  assert.equal(s.state.personalStars.skyCount, 0);
+  assert.equal(s.stars(c).birthday.day, 10);
+});
+
+test("real visit cycle also resets once, and duplicate 366th session cannot increment again", () => {
+  const storage = memory(),
+    s = createStore({ storage });
+  for (let i = 0; i < 366; i++) s.act("recordVisit", "session_real_" + i, c);
+  assert.equal(s.stars(c).visits, 0);
+  assert.equal(s.act("recordVisit", "session_real_365", c), false);
+  assert.equal(createStore({ storage }).stars(c).visits, 0);
+});
