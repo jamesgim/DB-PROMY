@@ -342,7 +342,16 @@ export function createStore({
       return available;
     },
     spectate,
-    demonstration,
+    get demonstration() {
+      return demonstration;
+    },
+    enableDemo() {
+      if (spectate) return false;
+      if (demonstration) return true;
+      demonstration = true;
+      emit();
+      return true;
+    },
     journey: (clock = kst(now())) =>
       journeyProgress(state, clock.day, demonstration),
     stars: (clock = kst(now())) =>

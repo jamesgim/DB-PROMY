@@ -25,7 +25,6 @@ try {
   await p.locator("#placeStone").click();
   await p.waitForFunction(() => window.__PROMY_QA__.journey.stones === 1);
   assert.equal(await p.locator("#placeStone").isDisabled(), true);
-  await p.keyboard.press("1");
   assert.equal(await p.locator("#dailyTotal").textContent(), "1");
   await p.reload();
   await p.waitForFunction(() => window.__PROMY_QA__?.journey.stones === 1);

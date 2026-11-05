@@ -168,3 +168,24 @@ test("0 resets demo towers/rewards only and 9 resets demo visits only, retaining
     false,
   );
 });
+
+test("enabling keyboard demo switches projections immediately and keeps real records isolated", () => {
+  const storage = memory(),
+    s = createStore({ storage });
+  const c = clock();
+  complete(s, 0);
+  s.act("placeStone", null, c);
+  s.act("recordVisit", "real_session_keys", c);
+  assert.equal(s.enableDemo(), true);
+  assert.equal(s.demonstration, true);
+  assert.equal(s.journey(c).stones, 0);
+  assert.equal(s.stars(c).visits, 0);
+  s.act("demoStone", null, c);
+  s.act("demoStone", null, c);
+  s.act("demoVisit", null, c);
+  assert.equal(s.journey(c).stones, 2);
+  assert.equal(s.stars(c).visits, 1);
+  assert.equal(createStore({ storage }).journey(c).stones, 1);
+  assert.equal(createStore({ storage }).stars(c).visits, 1);
+  assert.equal(createStore({ storage, spectate: true }).enableDemo(), false);
+});

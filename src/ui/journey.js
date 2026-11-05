@@ -4,6 +4,7 @@ import {
   data,
   demonstration,
   spectate,
+  enableDemoControls,
 } from "../systems/runtime.js";
 import { copy } from "../data/copy.js";
 import { openPersonalStars } from "./personal-stars.js";
@@ -43,6 +44,10 @@ export function mountJourney(panel, toast) {
   };
   function putStone() {
     const before = store.journey(currentClock());
+    if (before.yearComplete) {
+      toast(copy("journey.done"));
+      return;
+    }
     if (
       store.act(
         demonstration ? "demoStone" : "placeStone",
@@ -77,81 +82,60 @@ export function mountJourney(panel, toast) {
       );
     }
   }
+  function closeOverlays(except = "") {
+    document.querySelectorAll("dialog[open]").forEach((d) => {
+      if (d.id !== except) d.close();
+    });
+    document.querySelector(".modal-back.open")?.classList.remove("open");
+  }
   window.addEventListener("keydown", (e) => {
+    const typing =
+      e.target instanceof Element &&
+      e.target.closest('input,select,textarea,[contenteditable="true"]');
     if (
-      !spectate &&
-      !e.ctrlKey &&
-      !e.metaKey &&
-      !e.altKey &&
-      !e.repeat &&
-      !e.target.closest("input,select,textarea") &&
-      ["Digit8", "Numpad8", "Digit7", "Numpad7"].includes(e.code)
-    ) {
-      e.preventDefault();
-      const adding = e.code.endsWith("8");
-      if (
-        store.act(
-          adding ? "addSkyBirthday" : "resetSkyBirthdays",
-          null,
-          currentClock(),
-        ) &&
-        adding
-      ) {
-        document
-          .querySelectorAll("dialog[open]:not(#skyCanvasDialog)")
-          .forEach((d) => d.close());
-        document.querySelector(".modal-back.open")?.classList.remove("open");
-        window.dispatchEvent(
-          new CustomEvent("promy:stars", {
-            detail: { birthdayIndex: store.state.personalStars.skyCount - 1 },
-          }),
-        );
-      }
+      spectate ||
+      typing ||
+      e.isComposing ||
+      e.ctrlKey ||
+      e.metaKey ||
+      e.altKey
+    )
+      return;
+    const match = /^(?:Digit|Numpad)([012789])$/.exec(e.code);
+    if (!match) return;
+    const key = match[1];
+    if (e.repeat && ["0", "7", "8", "9"].includes(key)) return;
+    e.preventDefault();
+    if (["0", "1", "2", "9"].includes(key) && !enableDemoControls()) return;
+    if (key === "0") {
+      resetPart("resetDemoTowers");
       return;
     }
-    if (
-      demonstration &&
-      !spectate &&
-      !e.ctrlKey &&
-      !e.metaKey &&
-      !e.altKey &&
-      !e.repeat &&
-      !e.target.closest("input,select,textarea")
-    ) {
-      if (["Digit0", "Numpad0", "Digit9", "Numpad9"].includes(e.code)) {
-        e.preventDefault();
-        resetPart(e.code.endsWith("0") ? "resetDemoTowers" : "resetDemoStars");
-        return;
-      }
+    if (key === "9") {
+      resetPart("resetDemoStars");
+      return;
     }
-
-    if (
-      demonstration &&
-      !spectate &&
-      !e.ctrlKey &&
-      !e.metaKey &&
-      !e.altKey &&
-      ["Digit2", "Numpad2"].includes(e.code) &&
-      !e.target.closest("input,select,textarea") &&
-      !document.querySelector(".modal-back.open") &&
-      !document.querySelector("dialog[open]:not(#personalStars)")
-    ) {
-      e.preventDefault();
+    if (key === "1") {
+      closeOverlays();
+      putStone();
+      return;
+    }
+    if (key === "2") {
+      closeOverlays("personalStars");
       store.act("demoVisit", null, currentClock());
       return;
     }
-
-    if (
-      demonstration &&
-      !e.ctrlKey &&
-      !e.metaKey &&
-      !e.altKey &&
-      ["Digit1", "Numpad1"].includes(e.code) &&
-      !document.querySelector("dialog[open]") &&
-      !e.target.closest("input,select,textarea")
-    ) {
-      e.preventDefault();
-      putStone();
+    if (key === "7") {
+      store.act("resetSkyBirthdays", null, currentClock());
+      return;
+    }
+    if (key === "8" && store.act("addSkyBirthday", null, currentClock())) {
+      closeOverlays("skyCanvasDialog");
+      window.dispatchEvent(
+        new CustomEvent("promy:stars", {
+          detail: { birthdayIndex: store.state.personalStars.skyCount - 1 },
+        }),
+      );
     }
   });
   root.querySelector("#viewTowers").onclick = () =>

@@ -10,7 +10,8 @@
     "vendor": "node scripts/vendor.js",
     "qa": "node scripts/sky-performance-qa.js",
     "qa:towers": "node scripts/journey-qa.js",
-    "qa:music": "node scripts/reset-music-qa.js"
+    "qa:music": "node scripts/reset-music-qa.js",
+    "qa:keys": "node scripts/all-keys-qa.js"
   },
   "devDependencies": {
     "@gltf-transform/core": "4.2.1",

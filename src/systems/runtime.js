@@ -14,8 +14,22 @@ try {
 }
 export const admin = params.get("admin") === "1";
 export const spectate = params.get("spectate") === "1";
-export const demonstration = admin || params.get("demo") === "1";
+let savedTestMode = false;
+try {
+  savedTestMode = sessionStorage.getItem("promy.testControls") === "1";
+} catch {}
+export let demonstration = admin || params.get("demo") === "1" || savedTestMode;
 export const store = createStore({ storage, spectate, demonstration });
+export function enableDemoControls() {
+  if (spectate) return false;
+  if (demonstration) return true;
+  demonstration = true;
+  try {
+    sessionStorage.setItem("promy.testControls", "1");
+  } catch {}
+  return store.enableDemo();
+}
+
 if (!demonstration && !spectate) {
   let session;
   try {

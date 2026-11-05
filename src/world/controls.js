@@ -17,9 +17,9 @@ export function controls(
     near: null,
     moving: false,
   };
-  const viewKey = "promy.view." + (demonstration ? "demo" : "real");
+  const viewKey = () => "promy.view." + (demonstration ? "demo" : "real");
   try {
-    const v = JSON.parse(sessionStorage.getItem(viewKey));
+    const v = JSON.parse(sessionStorage.getItem(viewKey()));
     if (
       v &&
       Array.isArray(v.position) &&
@@ -41,7 +41,7 @@ export function controls(
   const saveView = () => {
     try {
       sessionStorage.setItem(
-        viewKey,
+        viewKey(),
         JSON.stringify({
           position: player.position.toArray(),
           rotation: player.rotation.y,
