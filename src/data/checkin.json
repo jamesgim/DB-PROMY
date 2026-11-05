@@ -1,0 +1,36 @@
+{
+  "standard": [
+    {
+      "id": "meal",
+      "label": "$text.141",
+      "hour": 17
+    },
+    {
+      "id": "day",
+      "label": "$text.142",
+      "hour": 17
+    },
+    {
+      "id": "home",
+      "label": "$text.143",
+      "hour": 18
+    }
+  ],
+  "demo": [
+    {
+      "id": "meal",
+      "label": "$text.144",
+      "hour": 0
+    },
+    {
+      "id": "day",
+      "label": "$text.145",
+      "hour": 0
+    },
+    {
+      "id": "home",
+      "label": "$text.146",
+      "hour": 0
+    }
+  ]
+}

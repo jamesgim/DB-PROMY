@@ -1,0 +1,186 @@
+[
+  {
+    "name": "player",
+    "bytes": 16280,
+    "triangles": 988,
+    "clips": [
+      "idle",
+      "walk",
+      "wave",
+      "cheer",
+      "sit",
+      "fold_paper",
+      "check_in"
+    ]
+  },
+  {
+    "name": "promy",
+    "bytes": 21960,
+    "triangles": 2010,
+    "clips": [
+      "idle",
+      "walk",
+      "wave",
+      "cheer",
+      "lantern_add",
+      "point"
+    ]
+  },
+  {
+    "name": "mailbox",
+    "bytes": 5352,
+    "triangles": 116,
+    "clips": [
+      "lid_open",
+      "glow"
+    ]
+  },
+  {
+    "name": "house-0",
+    "bytes": 6044,
+    "triangles": 104,
+    "clips": []
+  },
+  {
+    "name": "house-1",
+    "bytes": 6040,
+    "triangles": 104,
+    "clips": []
+  },
+  {
+    "name": "house-2",
+    "bytes": 6044,
+    "triangles": 104,
+    "clips": []
+  },
+  {
+    "name": "postoffice",
+    "bytes": 3492,
+    "triangles": 92,
+    "clips": []
+  },
+  {
+    "name": "lantern",
+    "bytes": 3428,
+    "triangles": 68,
+    "clips": []
+  },
+  {
+    "name": "lantern-hanging",
+    "bytes": 3332,
+    "triangles": 56,
+    "clips": []
+  },
+  {
+    "name": "lantern-floor",
+    "bytes": 3184,
+    "triangles": 24,
+    "clips": []
+  },
+  {
+    "name": "seat",
+    "bytes": 3236,
+    "triangles": 32,
+    "clips": []
+  },
+  {
+    "name": "campfire",
+    "bytes": 6992,
+    "triangles": 736,
+    "clips": [
+      "flame"
+    ]
+  },
+  {
+    "name": "tree-0",
+    "bytes": 3488,
+    "triangles": 68,
+    "clips": []
+  },
+  {
+    "name": "tree-1",
+    "bytes": 3564,
+    "triangles": 72,
+    "clips": []
+  },
+  {
+    "name": "tree-2",
+    "bytes": 3584,
+    "triangles": 72,
+    "clips": []
+  },
+  {
+    "name": "bush-0",
+    "bytes": 3264,
+    "triangles": 20,
+    "clips": []
+  },
+  {
+    "name": "bush-1",
+    "bytes": 3264,
+    "triangles": 20,
+    "clips": []
+  },
+  {
+    "name": "flower",
+    "bytes": 3884,
+    "triangles": 136,
+    "clips": []
+  },
+  {
+    "name": "bench",
+    "bytes": 3288,
+    "triangles": 48,
+    "clips": []
+  },
+  {
+    "name": "fence",
+    "bytes": 3312,
+    "triangles": 60,
+    "clips": []
+  },
+  {
+    "name": "arch",
+    "bytes": 3176,
+    "triangles": 36,
+    "clips": []
+  },
+  {
+    "name": "bunting",
+    "bytes": 3436,
+    "triangles": 60,
+    "clips": []
+  },
+  {
+    "name": "crosswalk",
+    "bytes": 5292,
+    "triangles": 644,
+    "clips": []
+  },
+  {
+    "name": "fountain",
+    "bytes": 3956,
+    "triangles": 168,
+    "clips": []
+  },
+  {
+    "name": "dog",
+    "bytes": 5132,
+    "triangles": 280,
+    "clips": [
+      "dog_walk"
+    ]
+  },
+  {
+    "name": "sports",
+    "bytes": 3404,
+    "triangles": 108,
+    "clips": []
+  },
+  {
+    "name": "dinner",
+    "bytes": 3900,
+    "triangles": 208,
+    "clips": []
+  }
+]

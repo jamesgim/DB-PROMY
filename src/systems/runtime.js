@@ -1,0 +1,91 @@
+import { createStore, KEY } from "./state.js";
+import { kst } from "./clock.js";
+import { resolveCopy } from "../data/copy.js";
+const params = new URLSearchParams(location.search);
+let storage;
+try {
+  storage = localStorage;
+} catch {
+  storage = {
+    setItem() {
+      throw Error("unavailable");
+    },
+  };
+}
+export const admin = params.get("admin") === "1";
+export const spectate = params.get("spectate") === "1";
+let savedTestMode = false;
+try {
+  savedTestMode = sessionStorage.getItem("promy.testControls") === "1";
+} catch {}
+export let demonstration = admin || params.get("demo") === "1" || savedTestMode;
+export const store = createStore({ storage, spectate, demonstration });
+export function enableDemoControls() {
+  if (spectate) return false;
+  if (demonstration) return true;
+  demonstration = true;
+  try {
+    sessionStorage.setItem("promy.testControls", "1");
+  } catch {}
+  return store.enableDemo();
+}
+
+if (!demonstration && !spectate) {
+  let session;
+  try {
+    const key = "promy.visit.session";
+    session = sessionStorage.getItem(key);
+    if (!session) {
+      session = crypto.randomUUID().replaceAll("-", "");
+      sessionStorage.setItem(key, session);
+    }
+  } catch {
+    session = crypto.randomUUID().replaceAll("-", "");
+  }
+  store.act("recordVisit", session);
+}
+export const demo = { hour: null, neighbors: null, milestone: 0, ritual: 0 };
+export function currentClock() {
+  const c = kst();
+  return demo.hour === null
+    ? c
+    : {
+        ...c,
+        hour: demo.hour,
+        minute: 0,
+        minutes: demo.hour * 60,
+        phase:
+          demo.hour < 6
+            ? "dawn"
+            : demo.hour < 17
+              ? "day"
+              : demo.hour < 21
+                ? "evening"
+                : "ritual",
+        demo: true,
+      };
+}
+export function loadData(name) {
+  return fetch(new URL("../data/" + name + ".json", import.meta.url))
+    .then((r) => {
+      if (!r.ok) throw Error(name);
+      return r.json();
+    })
+    .then(resolveCopy);
+}
+window.addEventListener("storage", (e) => {
+  if (e.key === KEY) store.sync(e.newValue);
+});
+store.act("visit", params.get("src"));
+store.act("name", params.get("name"));
+console.info("PROMY local referral metrics", store.state.metrics.visits);
+export const data = await Promise.all(
+  ["checkin", "brand", "categories", "rewards", "care", "goods"].map(loadData),
+).then(([checkin, brand, categories, rewards, care, goods]) => ({
+  checkin,
+  brand,
+  categories,
+  rewards,
+  care,
+  goods,
+}));
